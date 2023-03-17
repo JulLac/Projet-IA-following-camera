@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+curl https://get.pimoroni.com/pantilthat | bash
+sudo raspi-config nonint do_i2c 0
+python3 -m pip install pantilthat
+sudo apt install vim
+
+rm -rf ~/.pyenv
+
+sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
+libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev python3-openssl
+
+curl https://pyenv.run | bash
+
+pyenv install -v 3.9.2
+
+pyenv local 3.9.2
+
+sudo apt install python3-pygt5
