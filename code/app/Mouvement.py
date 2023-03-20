@@ -12,7 +12,7 @@ class Mouvement_camera:
         self.center=[largeur/2,hauteur/2] #entre 0 et 1
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
         self.threshold=0.1 #seuil de sensibilité en dégré
-        self.pas=10
+        self.pas=2
 
     def centrer(self):
         self.mouvement_horizontal(0)
@@ -24,9 +24,9 @@ class Mouvement_camera:
         print(self.xmin,self.xmax,self.ymin,self.ymax)
         #H
         if(self.getcentre_tete()[0] > self.getcenter()[0]+self.threshold):
-            self.mouvement_horizontal(self.get_position_horizontal()+self.getpas())
-        elif(self.getcentre_tete()[0] < self.getcenter()[0]-self.threshold):
             self.mouvement_horizontal(self.get_position_horizontal()-self.getpas())
+        elif(self.getcentre_tete()[0] < self.getcenter()[0]-self.threshold):
+            self.mouvement_horizontal(self.get_position_horizontal()+self.getpas())
 
             
         #V
