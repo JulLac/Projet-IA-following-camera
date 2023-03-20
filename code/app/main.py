@@ -251,35 +251,46 @@ with dai.Device(pipeline) as device:
                     
             else:
                 # Only execute the for loop if 5 seconds have passed since the last execution
-                if time.time() - last_exec_time >= 0.35:
-                    best_detection = None
-                    is_unknown = 1
-                    best_index = None
-                    for i, detection in enumerate(dets):
-                        if best_detection is None or detection.confidence > best_detection.confidence:
-                            if detection.label == "Unknown":
-                                if is_unknown == 1:
-                                    best_detection = detection
-                                    best_index = i
+                if len(dets) > 0:
+                    if time.time() - last_exec_time >= 0.35:
+
+                        best_detection = None
+                        is_unknown = 1
+                        best_index = None
+                        for i, detection in enumerate(dets):
+                            if best_detection is None or detection.confidence > best_detection.confidence:
+                                if detection.label == "Unknown":
+                                    if is_unknown == 1:
+                                        best_detection = detection
+                                        best_index = i
+                                    else:
+                                        pass
                                 else:
-                                    pass
-                            else:
-                                best_detection = detection
-                                is_unknown = 0
-                                best_index = i
-                    
-                    if best_detection is not None:
-                        bbox = frame_norm(frame, (best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
-                        #print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
-                        cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
-                        
-                        features = np.array(msgs["recognition"][best_index].getFirstLayerFp16())
-                        conf, name = facerec.new_recognition(features)
-                        text.putText(frame, f"{name} {(100*conf):.0f}%", (bbox[0] + 10,bbox[1] + 35))
-                        
-                        tourner_camera(object_camera,best_detection.xmin,best_detection.xmax,best_detection.ymin,best_detection.ymax)
-                        
-                    last_exec_time = time.time()  # update the last execution time
+                                    best_detection = detection
+                                    is_unknown = 0
+                                    best_index = i
+
+                        if best_detection is not None:
+                            bbox = frame_norm(frame, (best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
+                            #print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
+                            cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
+
+                            features = np.array(msgs["recognition"][best_index].getFirstLayerFp16())
+                            conf, name = facerec.new_recognition(features)
+                            text.putText(frame, f"{name} {(100*conf):.0f}%", (bbox[0] + 10,bbox[1] + 35))
+
+                            tourner_camera(object_camera,best_detection.xmin,best_detection.xmax,best_detection.ymin,best_detection.ymax)
+
+                        last_exec_time = time.time()  # update the last execution time
+                else:
+                    if time.time() - last_exec_time >= 8:
+                        # look for someone
+                        # Resrt le self.once = True de la fonction de Julian
+                    # A la fin remettre self.direction = Centre dit Julian
+
+
+                    # if someone is detecte
+                    # last_exec_time = time.time()  # update the last execution time
 
             cv2.imshow("rgb", cv2.resize(frame, (800,800)))
 
