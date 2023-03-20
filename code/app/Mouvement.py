@@ -33,7 +33,7 @@ class Mouvement_camera:
                         self.boucle_balayage+=1
                 else:
                     if(self.get_position_horizontal()+self.getpas()<90):
-                        self.mouvement_horizontal(self.get_position_horizontal()-self.getpas())
+                        self.mouvement_horizontal(self.get_position_horizontal()+self.getpas())
                     else:
                         self.mouvement_horizontal(90)
                         self.direction="Gauche"
