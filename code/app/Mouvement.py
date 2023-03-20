@@ -1,5 +1,5 @@
 import pantilthat
-import math
+import time
 
 class Mouvement_camera:
     def __init__(self,hauteur,largeur,xmax,xmin,ymax,ymin):
@@ -13,39 +13,62 @@ class Mouvement_camera:
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
         self.threshold=0.1 #seuil de sensibilité en dégré
         self.pas=2
+        self.direction="Centre"
+        self.boucle_balayage=0
+        self.temps=0
 
-    def centrer(self):
-        self.mouvement_horizontal(0)
-        self.mouvement_vertical(0)
+    def balayage(self):
+        if(self.direction=="Centre"):
+            self.mouvement_vertical(0)#centrer l'axe vertical
+            self.mouvement_horizontal(0)#centrer l'axe horizontal
+            self.direction="Gauche"
+        else:
+            if(self.boucle_balayage<=1):
+                if(self.direction=="Gauche"):
+                    if(self.get_position_horizontal()-self.getpas()>-90):
+                        self.mouvement_horizontal(self.get_position_horizontal()-self.getpas())
+                    else:
+                        self.mouvement_horizontal(-90)
+                        self.direction="Droite"
+                        self.boucle_balayage+=1
+                else:
+                    if(self.get_position_horizontal()+self.getpas()<90):
+                        self.mouvement_horizontal(self.get_position_horizontal()-self.getpas())
+                    else:
+                        self.mouvement_horizontal(90)
+                        self.direction="Gauche"
+            else:
+                if(self.temps==0):
+                    self.centrer() #centrer caméra
+                    self.temps = time.time()#capture du temps actuel
+
+                if(self.temps+5.0>=time.time()):#pause de 5 secondes
+                    self.reset()#baculer balayage
         
     def bouger_camera(self):
         self.calculate_centre_tete()
-        print(self.getcentre_tete())
-        print(self.xmin,self.xmax,self.ymin,self.ymax)
+
         #H
         if(self.getcentre_tete()[0] > self.getcenter()[0]+self.threshold):
             self.mouvement_horizontal(self.get_position_horizontal()-self.getpas())
         elif(self.getcentre_tete()[0] < self.getcenter()[0]-self.threshold):
             self.mouvement_horizontal(self.get_position_horizontal()+self.getpas())
-
             
         #V
         if(self.getcentre_tete()[1] > self.getcenter()[1]+self.threshold):
             self.mouvement_vertical(self.get_position_vertical()+self.getpas())
         elif(self.getcentre_tete()[1] < self.getcenter()[1]-self.threshold):
             self.mouvement_vertical(self.get_position_vertical()-self.getpas())
-        
-        """angle_horizontal=math.atan2(self.getcentre_tete()[0]-self.getcenter()[1],self.getcenter()[1])*(180/math.pi)/4
-        angle_vertical=math.atan2(self.getcentre_tete()[1]-self.getcenter()[0],self.getcenter()[0])*(180/math.pi)/2
 
-        #avoir un mouvement de +/- 5° au minimum pour garder en fluidité
-        if(angle_horizontal>(self.get_position_horizontal()+self.gethreshold()) or angle_horizontal<(self.get_position_horizontal()-self.gethreshold())):
-            self.mouvement_horizontal(angle_horizontal)
-        if(angle_vertical>(self.get_position_vertical()+self.gethreshold()) or angle_vertical<(self.get_position_vertical()-self.gethreshold())):
-            self.mouvement_vertical(angle_vertical)
-        """
+    def centrer(self):
+        self.mouvement_horizontal(0)
+        self.mouvement_vertical(0)
 
-        
+    def reset(self):
+        self.direction='Centre'
+        self.temps=0
+        self.boucle_balayage=0
+
     def getpas(self):
         return self.pas
 
