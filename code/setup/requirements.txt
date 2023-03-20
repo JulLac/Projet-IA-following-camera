@@ -1,3 +1,4 @@
 depthai
 blobconverter
 opencv-python-headless
+pantilthat
