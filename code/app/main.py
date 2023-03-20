@@ -284,13 +284,9 @@ with dai.Device(pipeline) as device:
                         last_exec_time = time.time()  # update the last execution time
                 else:
                     if time.time() - last_exec_time >= 8:
-                        # look for someone
-                        # Resrt le self.once = True de la fonction de Julian
-                    # A la fin remettre self.direction = Centre dit Julian
-
-
-                    # if someone is detecte
-                    # last_exec_time = time.time()  # update the last execution time
+                        object_camera.balayage()
+                        object_camera.reset()
+                        last_exec_time = time.time()  # update the last execution time
 
             cv2.imshow("rgb", cv2.resize(frame, (800,800)))
 
