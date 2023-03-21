@@ -52,15 +52,28 @@ class Mouvement_camera:
         #self.calcul_pas()
         #H
         if(self.centre_tete[0] > self.center[0]+self.threshold):
-            self.mouvement_horizontal(self.get_position_horizontal()-self.pas)#Gauche
+            if(self.center[0]+self.threshold<=90):
+                self.mouvement_horizontal(self.get_position_horizontal()-self.pas)#Gauche
+            else:
+                self.mouvement_horizontal(90)
         elif(self.centre_tete[0] < self.center[0]-self.threshold):
-            self.mouvement_horizontal(self.get_position_horizontal()+self.pas)#Droite
+            if(self.center[0]-self.threshold>=-90):
+                self.mouvement_horizontal(self.get_position_horizontal()+self.pas)#Droite
+            else:
+                self.mouvement_horizontal(-90)
             
         #V
         if(self.centre_tete[1] > self.center[1]+self.threshold):
-            self.mouvement_vertical(self.get_position_vertical()+self.pas)#Bas
+            if(self.center[1]+self.threshold<=90):
+                self.mouvement_vertical(self.get_position_vertical()+self.pas)#Bas
+            else:
+                self.mouvement_vertical(90)
         elif(self.centre_tete[1] < self.center[1]-self.threshold):
-            self.mouvement_vertical(self.get_position_vertical()-self.pas)#Haut
+            if(self.center[1]-self.threshold>=-90):
+                self.mouvement_vertical(self.get_position_vertical()-self.pas)#Haut
+            else:
+                self.mouvement_vertical(-90)
+
 
     def calcul_pas(self):
         pas_max=10
