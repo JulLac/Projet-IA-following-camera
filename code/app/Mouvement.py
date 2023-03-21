@@ -9,12 +9,13 @@ class Mouvement_camera:
         self.xmin=xmin
         self.ymax=ymax
         self.ymin=ymin
-        self.center=[largeur/2,hauteur/2] #entre 0 et 1
+        self.center=[largeur/2,hauteur/2] #entre 0 et 10
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
         self.threshold=0.1 #seuil de sensibilité en dégré
         self.pasbalayage=2
-        self.pasvertical=2
-        self.pashorizontal=2
+        #self.pasvertical=2
+        #self.pashorizontal=2
+        self.pas=2
         self.direction="Centre"
         self.boucle_balayage=0
         self.temps=0
@@ -28,14 +29,14 @@ class Mouvement_camera:
             if(self.boucle_balayage<=1):
                 if(self.direction=="Gauche"):
                     if(self.get_position_horizontal()-self.pasbalayage>-90):
-                        self.mouvement_horizontal(self.get_position_horizontal()-self.pasbalayage)
+                        self.mouvement_horizontal(self.get_position_horizontal()-self.pasbalayage)#Gauche
                     else:
                         self.mouvement_horizontal(-90)
                         self.direction="Droite"
                         self.boucle_balayage+=1
                 else:
                     if(self.get_position_horizontal()+self.pasbalayage<90):
-                        self.mouvement_horizontal(self.get_position_horizontal()+self.pasbalayage)
+                        self.mouvement_horizontal(self.get_position_horizontal()+self.pasbalayage)#Droite
                     else:
                         self.mouvement_horizontal(90)
                         self.direction="Gauche"
@@ -43,23 +44,23 @@ class Mouvement_camera:
                 if(self.temps==0):
                     self.centrer() #centrer caméra
                     self.temps = time.time()#capture du temps actuel
-                if(self.temps+5.0>=time.time()):#pause de 5 secondes
+                elif(time.time()-self.temps>5.0):#pause de 5 secondes
                     self.reset()#baculer balayage
         
     def bouger_camera(self):
         self.calculate_centre_tete()
-        self.calcul_pas()
+        #self.calcul_pas()
         #H
         if(self.centre_tete[0] > self.center[0]+self.threshold):
-            self.mouvement_horizontal(self.get_position_horizontal()-self.pashorizontal)
+            self.mouvement_horizontal(self.get_position_horizontal()-self.pas)#Gauche
         elif(self.centre_tete[0] < self.center[0]-self.threshold):
-            self.mouvement_horizontal(self.get_position_horizontal()+self.pashorizontal)
+            self.mouvement_horizontal(self.get_position_horizontal()+self.pas)#Droite
             
         #V
         if(self.centre_tete[1] > self.center[1]+self.threshold):
-            self.mouvement_vertical(self.get_position_vertical()+self.pasvertical)
+            self.mouvement_vertical(self.get_position_vertical()+self.pas)#Bas
         elif(self.centre_tete[1] < self.center[1]-self.threshold):
-            self.mouvement_vertical(self.get_position_vertical()-self.pasvertical)
+            self.mouvement_vertical(self.get_position_vertical()-self.pas)#Haut
 
     def calcul_pas(self):
         pas_max=10
@@ -91,7 +92,6 @@ class Mouvement_camera:
 
     def get_position_vertical(self):
         return pantilthat.get_tilt()#en degré servo 2
-
 
     def setHauteur(self,hauteur):
         self.hauteur=hauteur
