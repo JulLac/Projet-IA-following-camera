@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QMessageBox
 
 global check
 check = 0
+
+
 class InterfaceQT(QMainWindow):
     def __init__(self):
         super(InterfaceQT, self).__init__()
@@ -35,32 +37,12 @@ class InterfaceQT(QMainWindow):
         self.device = depthai.Device(self.pipeline)
         self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
 
-
         self.label = self.findChild(QLabel, "label_2")
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
-        #self.cap = cv2.VideoCapture(0)
-        """
-        # Create DepthAI pipeline
-        self.pipeline = depthai.Pipeline()
+        # self.cap = cv2.VideoCapture(0)
 
-        # Create ColorCamera node
-        self.cam = self.pipeline.createColorCamera()
-        self.cam.setPreviewSize(640, 480)
-
-        # Create XLinkOut nodes
-        self.xout_preview = self.pipeline.createXLinkOut()
-        self.xout_preview.setStreamName('preview')
-        self.xout_preview.input.setQueueSize(1)
-
-        # Link nodes
-        self.cam.preview.link(self.xout_preview.input)
-
-        with depthai.Device(self.pipeline) as device:
-            # Create video stream object for OAK-1 camera
-            self.stream = device.getOutputQueue('preview', maxSize=1, blocking=False)
-        """
         BoutonDetection = self.findChild(QPushButton, "DetectionBouton")
         BoutonDetection.clicked.connect(self.BoutonDetection_clicked)
 
@@ -85,7 +67,6 @@ class InterfaceQT(QMainWindow):
             # Display frame
             self.label.setPixmap(QPixmap.fromImage(qImg))
 
-
     def BoutonDetection_clicked(self):
         print("Button clicked")
 
@@ -100,8 +81,6 @@ class InterfaceQT(QMainWindow):
 
     def QuitterBouton_clicked(self):
         self.close()
-
-
 
     def stop(self):
         self.timer.stop()
