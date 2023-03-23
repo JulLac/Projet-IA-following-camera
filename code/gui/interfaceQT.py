@@ -15,6 +15,7 @@ import depthai as dai
 from textHelper import TextHelper
 from faceRecognition import FaceRecognition
 from MultiMsgSync import TwoStageHostSeqSync
+from Mouvement import Mouvement_camera
 global check
 check = 0
 
@@ -27,6 +28,9 @@ class InterfaceQT(QMainWindow):
         except FileNotFoundError:
             print("Could not find the UI file.")
             sys.exit(1)
+
+        self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
+        self.object_camera.centrer()
 
         # Create DepthAI pipeline
         self.pipeline = depthai.Pipeline()
@@ -162,6 +166,22 @@ class InterfaceQT(QMainWindow):
         QuitterBouton = self.findChild(QPushButton, "QuitterBouton")
         QuitterBouton.clicked.connect(self.QuitterBouton_clicked)
 
+    def tourner_camera(object_camera, xmin, xmax, ymin, ymax):
+        # servo 1 horizontal
+        # servo 2 vertical
+
+        # print("Position caméra:")
+        # print('Horizontal:',object_camera.get_position_horizontal())
+        # print('Vertical:',object_camera.get_position_vertical())
+        # Donner les coordonnées
+        object_camera.setxmax(xmax)
+        object_camera.setxmin(xmin)
+        object_camera.setymax(ymax)
+        object_camera.setymin(ymin)
+        object_camera.bouger_camera()
+        # print("\n")
+        # time.sleep(1)
+
     def frame_norm(self, frame, bbox):
         normVals = np.full(len(bbox), frame.shape[0])
         normVals[::2] = frame.shape[1]
@@ -218,8 +238,8 @@ class InterfaceQT(QMainWindow):
                             conf, name = self.facerec.new_recognition(features)
                             self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
 
-                            #tourner_camera(object_camera, best_detection.xmin, best_detection.xmax, best_detection.ymin,
-                            #               best_detection.ymax)
+                            self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax, best_detection.ymin,
+                                           best_detection.ymax)
 
                         last_exec_time = time.time()  # update the last execution time
                 else:
