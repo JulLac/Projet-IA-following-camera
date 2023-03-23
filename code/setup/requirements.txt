@@ -2,3 +2,4 @@ depthai
 blobconverter
 opencv-python-headless
 pantilthat
+pyQt5

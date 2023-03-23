@@ -228,7 +228,7 @@ with dai.Device(pipeline) as device:
     for name in ["rgb", "detection", "recognition"]:
         queues[name] = device.getOutputQueue(name)
 
-    last_exec_time = 0  # initialize the last execution time to 0
+    last_exec_time = time.time()  # initialize the last execution time to 0
     while True:
         for name, q in queues.items():
             # Add all msgs (color frames, object detections and face recognitions) to the Sync class.
@@ -285,7 +285,10 @@ with dai.Device(pipeline) as device:
                 else:
                     if time.time() - last_exec_time >= 8:
                         object_camera.balayage()
+<<<<<<< HEAD
                         last_exec_time = time.time()  # update the last execution time
+=======
+>>>>>>> a06a2f2f47adb8177b79d316c74fd57e17627f9c
 
             cv2.imshow("rgb", cv2.resize(frame, (800,800)))
 
