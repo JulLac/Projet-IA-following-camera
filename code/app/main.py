@@ -252,8 +252,8 @@ with dai.Device(pipeline) as device:
             else:
                 # Only execute the for loop if 5 seconds have passed since the last execution
                 if len(dets) > 0:
+                    object_camera.reset()
                     if time.time() - last_exec_time >= 0.35:
-
                         best_detection = None
                         is_unknown = 1
                         best_index = None
@@ -285,7 +285,6 @@ with dai.Device(pipeline) as device:
                 else:
                     if time.time() - last_exec_time >= 8:
                         object_camera.balayage()
-                        object_camera.reset()
                         last_exec_time = time.time()  # update the last execution time
 
             cv2.imshow("rgb", cv2.resize(frame, (800,800)))
