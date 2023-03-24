@@ -11,16 +11,15 @@ class Mouvement_camera:
         self.ymin=ymin
         self.center=[largeur/2,hauteur/2] #entre 0 et 10
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
-        self.threshold=0.1 #seuil de sensibilité en dégré
+        self.threshold=0.2 #seuil de sensibilité
         self.pasbalayage=2
-        #self.pasvertical=2
-        #self.pashorizontal=2
         self.pas=2
         self.direction="Centre"
         self.boucle_balayage=0
         self.temps=0
 
     def balayage(self):
+        #print(self.direction)
         if(self.direction=="Centre"):
             self.mouvement_vertical(0)#centrer l'axe vertical
             self.mouvement_horizontal(0)#centrer l'axe horizontal
@@ -49,7 +48,7 @@ class Mouvement_camera:
         
     def bouger_camera(self):
         self.calculate_centre_tete()
-        #self.calcul_pas()
+        
         #H
         if(self.centre_tete[0] > self.center[0]+self.threshold):
             if(self.center[0]+self.threshold<=90):
@@ -74,14 +73,6 @@ class Mouvement_camera:
             else:
                 self.mouvement_vertical(-90)
 
-
-    def calcul_pas(self):
-        pas_max=10
-        x=self.xmax-self.xmin
-        y=self.ymax-self.ymin
-        self.pasvertical = round(x*pas_max)
-        self.pashorizontal = round(y*pas_max)
-
     def centrer(self):
         self.mouvement_horizontal(0)
         self.mouvement_vertical(0)
@@ -105,12 +96,6 @@ class Mouvement_camera:
 
     def get_position_vertical(self):
         return pantilthat.get_tilt()#en degré servo 2
-
-    def setHauteur(self,hauteur):
-        self.hauteur=hauteur
-
-    def setLargeur(self,largeur):
-        self.largeur=largeur
 
     def setxmax(self,xmax):
         self.xmax=round(xmax,2)
