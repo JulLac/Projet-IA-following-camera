@@ -1,6 +1,4 @@
 import time
-
-
 sync = {}  # Dict of messages -  keys are sequence numbers and the values are lists of messages that correspond to that sequence number.
 
 # So the correct frame will be the first in the list
