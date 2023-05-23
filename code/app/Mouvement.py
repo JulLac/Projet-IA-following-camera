@@ -21,7 +21,7 @@ class Mouvement_camera:
     def balayage(self):
         #print(self.direction)
         if(self.direction=="Centre"):
-            self.mouvement_vertical(0)#centrer l'axe vertical
+            self.mouvement_vertical(-10)#centrer l'axe vertical
             self.mouvement_horizontal(0)#centrer l'axe horizontal
             self.direction="Gauche"
         else:
@@ -51,31 +51,33 @@ class Mouvement_camera:
         
         #H
         if(self.centre_tete[0] > self.center[0]+self.threshold):
-            if(self.center[0]+self.threshold<=90):
+            if(self.get_position_horizontal()-self.pas>=-90):
                 self.mouvement_horizontal(self.get_position_horizontal()-self.pas)#Gauche
             else:
-                self.mouvement_horizontal(90)
+                self.mouvement_horizontal(-90)
         elif(self.centre_tete[0] < self.center[0]-self.threshold):
-            if(self.center[0]-self.threshold>=-90):
+            if(self.get_position_horizontal()+self.pas<=90):
                 self.mouvement_horizontal(self.get_position_horizontal()+self.pas)#Droite
             else:
-                self.mouvement_horizontal(-90)
+                self.mouvement_horizontal(90)
             
         #V
         if(self.centre_tete[1] > self.center[1]+self.threshold):
-            if(self.center[1]+self.threshold<=90):
+            if(self.get_position_vertical()+self.pas<=90):
                 self.mouvement_vertical(self.get_position_vertical()+self.pas)#Bas
             else:
                 self.mouvement_vertical(90)
         elif(self.centre_tete[1] < self.center[1]-self.threshold):
-            if(self.center[1]-self.threshold>=-90):
+            if(self.get_position_vertical()-self.pas>=-90):
                 self.mouvement_vertical(self.get_position_vertical()-self.pas)#Haut
             else:
                 self.mouvement_vertical(-90)
 
+    #self.center[1]
+
     def centrer(self):
         self.mouvement_horizontal(0)
-        self.mouvement_vertical(0)
+        self.mouvement_vertical(-10)
 
     def reset(self):
         self.direction='Centre'
