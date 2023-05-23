@@ -57,7 +57,7 @@
         <enum>Qt::AutoText</enum>
        </property>
        <property name="pixmap">
-        <pixmap>../Images/logo_FaceTracking.png</pixmap>
+        <pixmap>../Images/CamAIra_logo.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>false</bool>
@@ -87,13 +87,13 @@
     <property name="styleSheet">
      <string notr="true">QPushButton{
 	border-radius:10px;
-	background-image: url(Images/IMG_detecter.png);
+	background-image: url(../gui/Images/IMG_detecter.png);
 }
 
 QPushButton:hover{	
 	
 	background-color: rgb(255, 85, 255);
-	background-image: url(Images/IMG_detecter_hover.png);
+	background-image: url(../gui/Images/IMG_detecter_hover.png);
 }
 
 
@@ -133,12 +133,12 @@ QPushButton:hover{
     <property name="styleSheet">
      <string notr="true">QPushButton{
 	border-radius:10px;
-	background-image: url(Images/IMG_lancer.png);
+	background-image: url(../gui/Images/IMG_lancer.png);
 }
 QPushButton:hover{	
 	
 	background-color: rgb(255, 85, 255);
-	background-image: url(Images/IMG_lancer_hover.png);
+	background-image: url(../gui/Images/IMG_lancer_hover.png);
 }</string>
     </property>
     <property name="text">
@@ -172,12 +172,12 @@ QPushButton:hover{
     <property name="styleSheet">
      <string notr="true">QPushButton{
 	border-radius:10px;
-	background-image: url(Images/IMG_quitter.png);
+	background-image: url(../gui/Images/IMG_quitter.png);
 }
 QPushButton:hover{	
 	
 	background-color: rgb(255, 85, 255);
-	background-image: url(Images/IMG_quitter_hover.png);
+	background-image: url(../gui/Images/IMG_quitter_hover.png);
 }</string>
     </property>
     <property name="text">
