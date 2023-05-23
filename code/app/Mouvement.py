@@ -11,7 +11,7 @@ class Mouvement_camera:
         self.ymin=ymin
         self.center=[largeur/2,hauteur/2] #entre 0 et 10
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
-        self.threshold=0.1 #10% de sensibilité par rapport au centre
+        self.threshold=0.2 #seuil de sensibilité
         self.pasbalayage=2
         self.pas=2
         self.direction="Centre"
@@ -19,6 +19,7 @@ class Mouvement_camera:
         self.temps=0
 
     def balayage(self):
+        #print(self.direction)
         if(self.direction=="Centre"):
             self.mouvement_vertical(0)#centrer l'axe vertical
             self.mouvement_horizontal(0)#centrer l'axe horizontal
@@ -47,7 +48,7 @@ class Mouvement_camera:
         
     def bouger_camera(self):
         self.calculate_centre_tete()
-        #self.calcul_pas()
+        
         #H
         if(self.centre_tete[0] > self.center[0]+self.threshold):
             if(self.center[0]+self.threshold<=90):

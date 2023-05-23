@@ -10,12 +10,15 @@ import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton
 import depthai as dai
-from textHelper import TextHelper
-from faceRecognition import FaceRecognition
-from MultiMsgSync import TwoStageHostSeqSync
-from Mouvement import Mouvement_camera
+import sys
+# tell interpreter where to look
+sys.path.insert(0,"..")
+from app.textHelper import TextHelper
+from app.faceRecognition import FaceRecognition
+from app.MultiMsgSync import TwoStageHostSeqSync
+from app.Mouvement import Mouvement_camera
 
 
 
@@ -23,7 +26,7 @@ class InterfaceQT(QMainWindow):
     def __init__(self):
         super(InterfaceQT, self).__init__()
         try:
-            uic.loadUi("assets/Interface_ProjetIA.ui", self)
+            uic.loadUi("../gui/assets/Interface_ProjetIA.ui", self)
         except FileNotFoundError:
             print("Could not find the UI file.")
             sys.exit(1)
@@ -89,7 +92,7 @@ class InterfaceQT(QMainWindow):
 
         self.copy_manip.out.link(self.script.inputs['preview'])
 
-        with open("script.py", "r") as f:
+        with open("../app/script.py", "r") as f:
             self.script.setScript(f.read())
 
         print("Creating Head pose estimation NN")
