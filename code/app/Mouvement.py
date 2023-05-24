@@ -20,7 +20,7 @@ class Mouvement_camera:
         self.ymin=ymin
         self.center=[largeur/2,hauteur/2] #entre 0 et 10
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
-        self.threshold=0.2 #seuil de sensibilité
+        self.threshold=0.1 #seuil de sensibilité
         self.pasbalayage=2
         self.pas=2
         self.direction=Centre
@@ -90,7 +90,8 @@ class Mouvement_camera:
         self.boucle_balayage=0
 
     def calculate_centre_tete(self):
-        self.centre_tete=[(self.xmax+self.xmin)/2,(self.ymax+self.ymin)/2] #entre 0 et 1
+        calcul_quart_moitie=(self.ymax+self.ymin/2)/4
+        self.centre_tete=[(self.xmax+self.xmin)/2,((self.ymax+self.ymin)/2)-calcul_quart_moitie] #entre 0 et 1
 
     def mouvement_horizontal(self,degre):
         pantilthat.pan(degre)
