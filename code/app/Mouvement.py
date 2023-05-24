@@ -10,7 +10,6 @@ max_degre_y=90
 defaut_degre_x=0
 defaut_degre_y=-10
 
-
 class Mouvement_camera:
     def __init__(self,hauteur,largeur,xmax,xmin,ymax,ymin):
         self.hauteur=hauteur
