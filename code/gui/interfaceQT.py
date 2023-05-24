@@ -13,13 +13,13 @@ from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QMessageBox
 import depthai as dai
 import sys
+
 # tell interpreter where to look
-sys.path.insert(0,"..")
+sys.path.insert(0, "..")
 from app.textHelper import TextHelper
 from app.faceRecognition import FaceRecognition
 from app.MultiMsgSync import TwoStageHostSeqSync
 from app.Mouvement import Mouvement_camera
-
 
 
 class InterfaceQT(QMainWindow):
@@ -30,7 +30,7 @@ class InterfaceQT(QMainWindow):
         except FileNotFoundError:
             print("Could not find the UI file.")
             sys.exit(1)
-            
+
         self.check = 0
         self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
         self.object_camera.centrer()
@@ -66,7 +66,6 @@ class InterfaceQT(QMainWindow):
         self.face_det_manip = self.pipeline.create(dai.node.ImageManip)
         self.face_det_manip.initialConfig.setResize(300, 300)
         self.copy_manip.out.link(self.face_det_manip.inputImage)
-
 
         # NeuralNetwork
         print("Creating Face Detection Neural Network...")
@@ -120,7 +119,8 @@ class InterfaceQT(QMainWindow):
         self.script.outputs['manip2_img'].link(self.face_rec_manip.inputImage)
 
         self.face_rec_nn = self.pipeline.create(dai.node.NeuralNetwork)
-        self.face_rec_nn.setBlobPath(blobconverter.from_zoo(name="face-recognition-arcface-112x112", zoo_type="depthai", shaves=6))
+        self.face_rec_nn.setBlobPath(
+            blobconverter.from_zoo(name="face-recognition-arcface-112x112", zoo_type="depthai", shaves=6))
         self.face_rec_manip.out.link(self.face_rec_nn.input)
 
         self.arc_xout = self.pipeline.create(dai.node.XLinkOut)
@@ -136,7 +136,7 @@ class InterfaceQT(QMainWindow):
         if not os.path.exists(self.databases):
             os.mkdir(self.databases)
 
-        self.facerec = FaceRecognition(self.databases, "Mathieu") #self.args.name)
+        self.facerec = FaceRecognition(self.databases, "Mathieu")  # self.args.name)
         self.sync = TwoStageHostSeqSync()
         self.text = TextHelper()
 
@@ -151,8 +151,7 @@ class InterfaceQT(QMainWindow):
 
         self.last_exec_time = time.time()  # initialize the last execution time to 0
 
-
-        #self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
+        # self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
 
         self.label = self.findChild(QLabel, "label_2")
         self.timer = QTimer()
@@ -160,8 +159,11 @@ class InterfaceQT(QMainWindow):
         self.timer.start(1)
         # self.cap = cv2.VideoCapture(0)
 
-        BoutonDetection = self.findChild(QPushButton, "DetectionBouton")
-        BoutonDetection.clicked.connect(self.BoutonDetection_clicked)
+        BoutonAuto = self.findChild(QPushButton, "Auto")
+        BoutonAuto.clicked.connect(self.BoutonAuto_clicked)
+
+        BoutonBrider = self.findChild(QPushButton, "Brider")
+        BoutonBrider.clicked.connect(self.BoutonBrider_clicked)
 
         LancerBouton = self.findChild(QPushButton, "LancerBouton")
         LancerBouton.clicked.connect(self.LancerBouton_clicked)
@@ -202,11 +204,11 @@ class InterfaceQT(QMainWindow):
             self.frame = self.msgs["rgb"].getCvFrame()
             self.dets = self.msgs["detection"].detections
 
-            #print(self.check)
-                
-            #if args.name:
+            # print(self.check)
+
+            # if args.name:
             if self.check == 2:
-                #print("enregistrement face")
+                # print("enregistrement face")
                 for i, detection in enumerate(self.dets):
                     bbox = self.frame_norm(self.frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                     cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
@@ -216,7 +218,7 @@ class InterfaceQT(QMainWindow):
                     self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
 
             else:
-                #print("detection")
+                # print("detection")
                 # Only execute the for loop if 5 seconds have passed since the last execution
                 if len(self.dets) > 0:
                     self.object_camera.reset()
@@ -238,8 +240,9 @@ class InterfaceQT(QMainWindow):
                                     best_index = i
 
                         if best_detection is not None:
-                            #print("move")
-                            bbox = self.frame_norm(self.frame, (best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
+                            # print("move")
+                            bbox = self.frame_norm(self.frame, (
+                            best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
                             # print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
                             cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
 
@@ -247,19 +250,19 @@ class InterfaceQT(QMainWindow):
                             conf, name = self.facerec.new_recognition(features)
                             self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
 
-                            self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax, best_detection.ymin, best_detection.ymax)
- 
+                            self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax,
+                                                best_detection.ymin, best_detection.ymax)
+
                         self.last_exec_time = time.time()  # update the last execution time
                 else:
                     if time.time() - self.last_exec_time >= 8:
-                        #print("balayage")
+                        # print("balayage")
                         self.object_camera.balayage()
-                        
 
             # self.check if frame is valid
             if self.frame is not None:
                 # Convert frame to QImage
-                self.frame = cv2.resize(self.frame, (741,511))
+                self.frame = cv2.resize(self.frame, (741, 511))
                 h, w, ch = self.frame.shape
                 bytesPerLine = ch * w
                 qImg = QImage(self.frame.data, w, h, bytesPerLine, QImage.Format_RGB888)
@@ -268,20 +271,25 @@ class InterfaceQT(QMainWindow):
                 # Display frame
                 self.label.setPixmap(QPixmap.fromImage(qImg))
 
-    def BoutonDetection_clicked(self):
-        #self.check = 1      
+    def BoutonAuto_clicked(self):
+        # self.check = 1
         pass
+
+    def BoutonBrider_clicked(self):
+        # self.check = 1
+        pass
+
     def LancerBouton_clicked(self):
-        #if self.check == 0:
+        # if self.check == 0:
         #    msg = QMessageBox()
         #    msg.setWindowTitle("Face Tracking")
         #    msg.setText("Veuillez vous enregistrer avant de lancer le suivi de caméra")
         #    msg.setIcon(QMessageBox.Information)
         #    msg.setStandardButtons(QMessageBox.Ok)
         #    msg.exec_()
-        #else:
+        # else:
         #    self.check = 0
-        pass    
+        pass
 
     def QuitterBouton_clicked(self):
         self.close()
