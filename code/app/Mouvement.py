@@ -90,8 +90,7 @@ class Mouvement_camera:
         self.boucle_balayage=0
 
     def calculate_centre_tete(self):
-        calcul_quart_moitie=(self.ymax+self.ymin/2)/4
-        self.centre_tete=[(self.xmax+self.xmin)/2,((self.ymax+self.ymin)/2)-calcul_quart_moitie] #entre 0 et 1
+        self.centre_tete=[(self.xmax+self.xmin)/2,(self.ymax+self.ymin)/2] #entre 0 et 1
 
     def mouvement_horizontal(self,degre):
         pantilthat.pan(degre)
