@@ -3,23 +3,22 @@ import os
 import sys
 import time
 
-import blobconverter
+#import blobconverter
 import cv2
-import depthai
 import numpy as np
 from PyQt5 import uic
 from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QMessageBox
-import depthai as dai
+from PyQt5.QtGui import QImage, QPixmap, QFont
+from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QMessageBox, QDialog, QVBoxLayout, QLineEdit
+#import depthai as dai
 import sys
 
 # tell interpreter where to look
 sys.path.insert(0, "..")
-from app.textHelper import TextHelper
-from app.faceRecognition import FaceRecognition
-from app.MultiMsgSync import TwoStageHostSeqSync
-from app.Mouvement import Mouvement_camera
+#from app.textHelper import TextHelper
+#from app.faceRecognition import FaceRecognition
+#from app.MultiMsgSync import TwoStageHostSeqSync
+#from app.Mouvement import Mouvement_camera
 
 
 class InterfaceQT(QMainWindow):
@@ -31,13 +30,13 @@ class InterfaceQT(QMainWindow):
             print("Could not find the UI file.")
             sys.exit(1)
 
+        """
         self.check = 0
         self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
         self.object_camera.centrer()
 
         # Create DepthAI pipeline
-        self.pipeline = depthai.Pipeline()
-
+        self.pipeline = dai.Pipeline()
         self.cam = self.pipeline.createColorCamera()
         self.cam.setPreviewSize(1072, 1072)
         self.VIDEO_SIZE = (1072, 1072)
@@ -143,7 +142,7 @@ class InterfaceQT(QMainWindow):
         self.queues = {}
 
         # Connect to device and start pipeline
-        self.device = depthai.Device(self.pipeline)
+        self.device = dai.Device(self.pipeline)
 
         # Create output queues
         for name in ["rgb", "detection", "recognition"]:
@@ -157,19 +156,27 @@ class InterfaceQT(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
-        # self.cap = cv2.VideoCapture(0)
+        """
+        self.cap = cv2.VideoCapture(0)
+        self.brid_xmin=None
+        self.brid_xmax=None
+        self.brid_ymin=None
+        self.brid_ymax=None
 
-        BoutonAuto = self.findChild(QPushButton, "Auto")
-        BoutonAuto.clicked.connect(self.BoutonAuto_clicked)
+        self.BoutonAuto = self.findChild(QPushButton, "Auto")
+        self.BoutonAuto.clicked.connect(self.BoutonAuto_clicked)
 
-        BoutonBrider = self.findChild(QPushButton, "Brider")
-        BoutonBrider.clicked.connect(self.BoutonBrider_clicked)
+        self.BoutonBrider = self.findChild(QPushButton, "Brider")
+        self.BoutonBrider.clicked.connect(self.BoutonBrider_clicked)
 
-        LancerBouton = self.findChild(QPushButton, "LancerBouton")
-        LancerBouton.clicked.connect(self.LancerBouton_clicked)
+        self.LancerBouton = self.findChild(QPushButton, "LancerBouton")
+        self.LancerBouton.clicked.connect(self.LancerBouton_clicked)
 
-        QuitterBouton = self.findChild(QPushButton, "QuitterBouton")
-        QuitterBouton.clicked.connect(self.QuitterBouton_clicked)
+        self.QuitterBouton = self.findChild(QPushButton, "QuitterBouton")
+        self.QuitterBouton.clicked.connect(self.QuitterBouton_clicked)
+
+        self.Text_mode = self.findChild(QLabel, "label_3")
+        self.Text_mode.setFont(QFont('Times', 15))
 
     def tourner_camera(self, object_camera, xmin, xmax, ymin, ymax):
         # servo 1 horizontal
@@ -194,6 +201,17 @@ class InterfaceQT(QMainWindow):
 
     def update_frame(self):
         # Get frame from video stream
+        ret, self.frame = self.cap.read()
+
+        # Display the resulting frame
+        #¶cv2.imshow('frame', self.frame)
+
+        # the 'q' button is set as the
+        # quitting button you may use any
+        # desired button of your choice
+
+
+        """ 
         for name, q in self.queues.items():
             # Add all msgs (color frames, object detections and face recognitions) to the Sync class.
             if q.has():
@@ -258,28 +276,108 @@ class InterfaceQT(QMainWindow):
                     if time.time() - self.last_exec_time >= 8:
                         # print("balayage")
                         self.object_camera.balayage()
+            
+        #self.check if frame is valid
+        if self.frame is not None:
+            # Convert frame to QImage
+            self.frame = cv2.resize(self.frame, (741, 511))
+            h, w, ch = self.frame.shape
+            bytesPerLine = ch * w
+            qImg = QImage(self.frame.data, w, h, bytesPerLine, QImage.Format_RGB888)
+            qImg = qImg.rgbSwapped()
 
-            # self.check if frame is valid
-            if self.frame is not None:
-                # Convert frame to QImage
-                self.frame = cv2.resize(self.frame, (741, 511))
-                h, w, ch = self.frame.shape
-                bytesPerLine = ch * w
-                qImg = QImage(self.frame.data, w, h, bytesPerLine, QImage.Format_RGB888)
-                qImg = qImg.rgbSwapped()
-
-                # Display frame
-                self.label.setPixmap(QPixmap.fromImage(qImg))
+            # Display frame
+            self.label.setPixmap(QPixmap.fromImage(qImg))
+            """
 
     def BoutonAuto_clicked(self):
-        # self.check = 1
-        pass
+        self.check = 1
+        print(self.check)
+
+    def get_line_edit_value(self, line_edit):
+        return line_edit.text()
 
     def BoutonBrider_clicked(self):
-        # self.check = 1
-        pass
+        print("BoutonBrider push")
+        self.check = 2
+        self.dialog = QDialog()
+        layout = QVBoxLayout()
+
+        label = QLabel("Valeur par défaut du bridage de la caméra :\n")
+        layout.addWidget(label)
+
+        #gauche
+        label_gauche = QLabel("Valeur bridage gauche (-90>valeur>90)")
+        layout.addWidget(label_gauche)
+        self.line_edit_xmin = QLineEdit("-90")
+        layout.addWidget(self.line_edit_xmin)
+
+        #droit
+        label_droit = QLabel("Valeur bridage droit (-90>valeur>90)")
+        layout.addWidget(label_droit)
+        self.line_edit_xmax = QLineEdit("90")
+        layout.addWidget(self.line_edit_xmax)
+
+        #haut
+        label_haut = QLabel("Valeur bridage haut (-90>valeur>90)")
+        layout.addWidget(label_haut)
+        self.line_edit_ymin = QLineEdit("-90")
+        layout.addWidget(self.line_edit_ymin)
+
+        #bas
+        label_bas = QLabel("Valeur bridage bas (-90>valeur>90)")
+        layout.addWidget(label_bas)
+        self.line_edit_ymax = QLineEdit("90")
+        layout.addWidget(self.line_edit_ymax)
+
+        button_valider = QPushButton("Valider")
+        button_valider.clicked.connect(self.Bouton_valider_clicked)
+        layout.addWidget(button_valider)
+
+        button = QPushButton("Fermer")
+        button.clicked.connect(self.dialog.close)
+        layout.addWidget(button)
+
+        self.dialog.setLayout(layout)
+        self.dialog.exec_()
+
+    def Bouton_valider_clicked(self):
+
+        try:
+            self.BoutonBrider.clicked.disconnect()
+            xmin = self.is_numeric(self.line_edit_xmin.text())
+            xmax = self.is_numeric(self.line_edit_xmax.text())
+            ymin = self.is_numeric(self.line_edit_ymin.text())
+            ymax = self.is_numeric(self.line_edit_ymax.text())
+
+            if -90 <= xmin < xmax <= 90 and -90 <= ymin < ymax <= 90:
+                self.brid_xmin = xmin
+                self.brid_xmax = xmax
+                self.brid_ymin = ymin
+                self.brid_ymax = ymax
+                print("Mise à jour du bridage haut à la valeur :", self.brid_ymin)
+                print("Mise à jour du bridage bas à la valeur :", self.brid_ymax)
+                print("Mise à jour du bridage droit à la valeur :", self.brid_xmax)
+                print("Mise à jour du bridage gauche à la valeur :", self.brid_xmin)
+            else:
+                self.popUp()
+
+        except TypeError:
+            pass
+        self.BoutonBrider.clicked.connect(self.BoutonBrider_clicked)
+
+    def popUp(self):
+        dialog = QDialog()
+        layout = QVBoxLayout()
+        label = QLabel("Les valeurs reseignées ne sont pas correctes !")
+        label.setFont(QFont('Times', 15))
+        label.setStyleSheet("color: red;")
+        layout.addWidget(label)
+        dialog.setLayout(layout)
+        dialog.exec_()
 
     def LancerBouton_clicked(self):
+        a = 2
         # if self.check == 0:
         #    msg = QMessageBox()
         #    msg.setWindowTitle("Face Tracking")
@@ -289,10 +387,26 @@ class InterfaceQT(QMainWindow):
         #    msg.exec_()
         # else:
         #    self.check = 0
-        pass
+
+
+    """
+    def button_valider_clicked(self):
+        user_input = x_min.text()
+        # Traitez l'entrée de l'utilisateur ici
+        print("Entrée de l'utilisateur :", user_input)
+        dialog.accept()
+    return x_min, x_max, y_min, y_max
+    """
 
     def QuitterBouton_clicked(self):
         self.close()
+
+    def is_numeric(self, nombre):
+        try:
+            return int(nombre)
+
+        except ValueError:
+            return False
 
     def stop(self):
         self.timer.stop()

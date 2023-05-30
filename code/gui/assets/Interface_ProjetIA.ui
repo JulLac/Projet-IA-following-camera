@@ -90,11 +90,13 @@
     <property name="styleSheet">
      <string notr="true">QPushButton{
 	border-radius:10px;
-	android:background="#FCD535" 
+	background-image: url(../gui/Images/IMG_auto.png);
+
 }
 
 QPushButton:hover{	
-	android:background="#FCD535" 
+	background-image: url(../gui/Images/IMG_auto_hover.png);
+
 }
 
 
@@ -138,7 +140,6 @@ QPushButton:hover{
 }
 QPushButton:hover{	
 	
-	background-color: rgb(255, 85, 255);
 	background-image: url(../gui/Images/IMG_lancer_hover.png);
 }</string>
     </property>
@@ -177,7 +178,6 @@ QPushButton:hover{
 }
 QPushButton:hover{	
 	
-	background-color: rgb(255, 85, 255);
 	background-image: url(../gui/Images/IMG_quitter_hover.png);
 }</string>
     </property>
@@ -225,11 +225,11 @@ QPushButton:hover{
     <property name="styleSheet">
      <string notr="true">QPushButton{
 	border-radius:10px;
-	android:background="#FCD535" 
+	background-image: url(../gui/Images/IMG_brider.png);
 }
 
 QPushButton:hover{	
-	android:background="#FCD535" 
+	background-image: url(../gui/Images/IMG_brider_hover.png);
 }
 
 
@@ -262,7 +262,7 @@ QPushButton:hover{
       <x>880</x>
       <y>350</y>
       <width>251</width>
-      <height>20</height>
+      <height>30</height>
      </rect>
     </property>
     <property name="sizePolicy">
