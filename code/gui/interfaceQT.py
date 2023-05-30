@@ -18,7 +18,7 @@ sys.path.insert(0, "..")
 #from app.textHelper import TextHelper
 #from app.faceRecognition import FaceRecognition
 #from app.MultiMsgSync import TwoStageHostSeqSync
-#from app.Mouvement import Mouvement_camera
+from app.Mouvement import Mouvement_camera
 
 
 class InterfaceQT(QMainWindow):
@@ -30,9 +30,10 @@ class InterfaceQT(QMainWindow):
             print("Could not find the UI file.")
             sys.exit(1)
 
-        """
-        self.check = 0
+
+        #self.check = 0
         self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
+        """
         self.object_camera.centrer()
 
         # Create DepthAI pipeline
@@ -158,10 +159,6 @@ class InterfaceQT(QMainWindow):
         self.timer.start(1)
         """
         self.cap = cv2.VideoCapture(0)
-        self.brid_xmin=None
-        self.brid_xmax=None
-        self.brid_ymin=None
-        self.brid_ymax=None
 
         self.BoutonAuto = self.findChild(QPushButton, "Auto")
         self.BoutonAuto.clicked.connect(self.BoutonAuto_clicked)
@@ -293,6 +290,10 @@ class InterfaceQT(QMainWindow):
     def BoutonAuto_clicked(self):
         self.check = 1
         print(self.check)
+        self.object_camera.set_max_degre_x_gauche(-90)
+        self.object_camera.set_max_degre_x_droite(90)
+        self.object_camera.set_max_degre_y_haut(-90)
+        self.object_camera.set_max_degre_y_bas(90)
 
     def get_line_edit_value(self, line_edit):
         return line_edit.text()
@@ -351,14 +352,16 @@ class InterfaceQT(QMainWindow):
             ymax = self.is_numeric(self.line_edit_ymax.text())
 
             if -90 <= xmin < xmax <= 90 and -90 <= ymin < ymax <= 90:
-                self.brid_xmin = xmin
-                self.brid_xmax = xmax
-                self.brid_ymin = ymin
-                self.brid_ymax = ymax
-                print("Mise à jour du bridage haut à la valeur :", self.brid_ymin)
-                print("Mise à jour du bridage bas à la valeur :", self.brid_ymax)
-                print("Mise à jour du bridage droit à la valeur :", self.brid_xmax)
-                print("Mise à jour du bridage gauche à la valeur :", self.brid_xmin)
+                print("Mise à jour du bridage haut à la valeur :", ymin)
+                print("Mise à jour du bridage bas à la valeur :", ymax)
+                print("Mise à jour du bridage droit à la valeur :", xmax)
+                print("Mise à jour du bridage gauche à la valeur :", xmin)
+
+                self.object_camera.set_max_degre_x_gauche(xmin)
+                self.object_camera.set_max_degre_x_droite(xmax)
+                self.object_camera.set_max_degre_y_haut(ymin)
+                self.object_camera.set_max_degre_y_bas(ymax)
+
             else:
                 self.popUp()
 
