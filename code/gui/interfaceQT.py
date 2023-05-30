@@ -351,7 +351,7 @@ class InterfaceQT(QMainWindow):
             ymin = self.is_numeric(self.line_edit_ymin.text())
             ymax = self.is_numeric(self.line_edit_ymax.text())
 
-            if -90 <= xmin < xmax <= 90 and -90 <= ymin < ymax <= 90:
+            if -90 <= xmin <= xmax <= 90 and -90 <= ymin <= ymax <= 90:
                 print("Mise à jour du bridage haut à la valeur :", ymin)
                 print("Mise à jour du bridage bas à la valeur :", ymax)
                 print("Mise à jour du bridage droit à la valeur :", xmax)
