@@ -34,7 +34,7 @@ class InterfaceQT(QMainWindow):
         self.frame = None
         
         ## Init face
-        self.init_face()
+        self.init_body()
         
         self.show_bounding_box = False
         self.lancer = False
@@ -62,34 +62,6 @@ class InterfaceQT(QMainWindow):
 
         self.ToggleButonFaceBody = self.findChild(QPushButton, "ToggleFaceBody")
         self.ToggleButonFaceBody.clicked.connect(self.ToggleButonFaceBody_clicked)
-
-    def ToggleButonFaceBody_clicked(self):
-        if self.body_detection:
-            self.ToggleButonFaceBody.setStyleSheet("""
-                    QPushButton{
-                        border-radius:10px;
-                        background-image: url(../gui/Images/IMG_bouton_visage.png);
-                    }
-                    QPushButton:hover{
-                        background-image: url(../gui/Images/IMG_bouton_visage_hover.png);
-                    }""")
-            self.body_detection = False
-            self.face_detection = True
-        else:
-            self.ToggleButonFaceBody.setStyleSheet("""
-                    QPushButton{
-                        border-radius:10px;
-                        background-image: url(../gui/Images/IMG_bouton_corps.png);
-                    }
-                    QPushButton:hover{
-                        background-image: url(../gui/Images/IMG_bouton_corps_hover.png);
-                    }""")
-            self.body_detection = True
-            self.face_detection = False
-        print('changement de mode')
-
-
-
 
     def init_face(self):
         
@@ -396,7 +368,7 @@ class InterfaceQT(QMainWindow):
             if self.check == 1:
                 print("enregistrement face")
                 for i, detection in enumerate(self.dets):
-                    bbox = self.frame_norm(self.frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
+                    bbox = self.frame_norm((detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                     cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
 
                     features = np.array(self.msgs["recognition"][i].getFirstLayerFp16())
@@ -428,8 +400,7 @@ class InterfaceQT(QMainWindow):
 
                             if best_detection is not None:
                                 # print("move")
-                                bbox = self.frame_norm(self.frame, (
-                                best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
+                                bbox = self.frame_norm((best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
                                 # print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
                                 
                                 features = np.array(self.msgs["recognition"][best_index].getFirstLayerFp16())
@@ -493,12 +464,12 @@ class InterfaceQT(QMainWindow):
                        
                         if best_detection is not None:
                             #print("move")
-                            bbox = self.frame_norm(frame, (best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
+                            bbox = self.frame_norm((best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
                             
                             if self.show_bounding_box:
-                                cv2.putText(frame, self.labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), self.color, 2)
+                                cv2.putText(self.frame, self.labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                                cv2.putText(self.frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                                cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), self.color, 2)
                             
                                 
                             self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax, best_detection.ymin, best_detection.ymax)
@@ -605,8 +576,8 @@ class InterfaceQT(QMainWindow):
 
     def LancerBouton_clicked(self):
 
-        if self.lancer:
-            self.lancer = False
+        if not self.lancer:
+            self.lancer = True
             self.LancerBouton.setStyleSheet("""
                 QPushButton{
         	        border-radius:10px;
@@ -616,7 +587,7 @@ class InterfaceQT(QMainWindow):
                     background-image: url(../gui/Images/IMG_arreter_hover.png);
                 }""")
         else:
-            self.lancer = True
+            self.lancer = False
             self.LancerBouton.setStyleSheet("""
                 QPushButton{
                     border-radius:10px;
@@ -624,22 +595,7 @@ class InterfaceQT(QMainWindow):
                 }
                 QPushButton:hover{
                     background-image: url(../gui/Images/IMG_lancer_hover.png);
-                }""")
-
-
-
-        
-        self.face_detection = False
-        self.body_detection = True
-        
-        try:
-            self.stop()
-        except:
-            pass
-        
-        # switch to body
-        self.init_body()
-        
+                }""")        
         # if self.check == 0:
         #    msg = QMessageBox()
         #    msg.setWindowTitle("Face Tracking")
@@ -659,6 +615,47 @@ class InterfaceQT(QMainWindow):
         dialog.accept()
     return x_min, x_max, y_min, y_max
     """
+    
+    
+    def ToggleButonFaceBody_clicked(self):
+        if self.body_detection:
+            self.ToggleButonFaceBody.setStyleSheet("""
+                    QPushButton{
+                        border-radius:10px;
+                        background-image: url(../gui/Images/IMG_bouton_visage.png);
+                    }
+                    QPushButton:hover{
+                        background-image: url(../gui/Images/IMG_bouton_visage_hover.png);
+                    }""")
+            
+            self.stop()
+            
+            # switch to face
+            self.init_face()
+
+            self.body_detection = False
+            self.face_detection = True
+            
+        else:
+            self.ToggleButonFaceBody.setStyleSheet("""
+                    QPushButton{
+                        border-radius:10px;
+                        background-image: url(../gui/Images/IMG_bouton_corps.png);
+                    }
+                    QPushButton:hover{
+                        background-image: url(../gui/Images/IMG_bouton_corps_hover.png);
+                    }""")
+            
+            self.stop()
+            
+            # switch to body
+            self.init_body()
+            
+            self.body_detection = True
+            self.face_detection = False
+            
+        print('changement de mode')
+
 
     def QuitterBouton_clicked(self):
         self.close()
@@ -671,8 +668,8 @@ class InterfaceQT(QMainWindow):
             return False
 
     def stop(self):
-        self.timer.stop()
+        #self.timer.stop()
         self.device.close()
-        self.pipeline.reset()
+        #self.pipeline.reset()
         self.frame = None
         
