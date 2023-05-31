@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from PyQt5 import uic, QtCore
 from PyQt5.QtGui import QFont, QImage, QPixmap
-from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout, QLineEdit, QCheckBox, QMainWindow
+from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout, QLineEdit, QCheckBox, QMainWindow, QMessageBox
 
 import depthai as dai
 import sys
@@ -597,16 +597,15 @@ class InterfaceQT(QMainWindow):
                 }
                 QPushButton:hover{
                     background-image: url(../gui/Images/IMG_lancer_hover.png);
-                }""")        
-        # if self.check == 0:
-        #    msg = QMessageBox()
-        #    msg.setWindowTitle("Face Tracking")
-        #    msg.setText("Veuillez vous enregistrer avant de lancer le suivi de caméra")
-        #    msg.setIcon(QMessageBox.Information)
-        #    msg.setStandardButtons(QMessageBox.Ok)
-        #    msg.exec_()
-        # else:
-        #    self.check = 0
+                }""")
+
+        msg = QMessageBox()
+        msg.setWindowTitle("Face Tracking")
+        msg.setText("Veuillez vous positionner devant la caméra face visible pendant l'enregistrement de votre tête")
+        msg.setIcon(QMessageBox.Information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+
 
 
     """
