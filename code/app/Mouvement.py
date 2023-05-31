@@ -45,15 +45,15 @@ class Mouvement_camera:
 
         #Horizontal
         if(self.centre_tete[0] > self.center[0]+threshold_horizontal):#Tête à droite
-            if(position_horizontal+pas_horizontal<=self.max_degre_x_droite):
-                self.mouvement_horizontal(position_horizontal+pas_horizontal)#Droite
-            else:
-                self.mouvement_horizontal(self.max_degre_x_droite)
-        elif(self.centre_tete[0] < self.center[0]-threshold_horizontal):#Tête à gauche
             if(position_horizontal-pas_horizontal>=self.max_degre_x_gauche):
                 self.mouvement_horizontal(position_horizontal-pas_horizontal)#Gauche
             else:
                 self.mouvement_horizontal(self.max_degre_x_gauche)
+        elif(self.centre_tete[0] < self.center[0]-threshold_horizontal):#Tête à gauche
+            if(position_horizontal+pas_horizontal<=self.max_degre_x_droite):
+                self.mouvement_horizontal(position_horizontal+pas_horizontal)#Droite
+            else:
+                self.mouvement_horizontal(self.max_degre_x_droite)
 
         #Vertical
         if(self.centre_tete[1] > self.center[1]+threshold_vertical):#Tête en bas

@@ -62,7 +62,7 @@ class FaceRecognition:
     def create_db(self, results):
         if self.name is None:
             if not self.printed:
-                print("Wanted to create new DB for this face, but --name wasn't specified")
+                print("Wanted to create new DB for this face, but name wasn't specified")
                 self.printed = True
             return
         print('Saving face...')

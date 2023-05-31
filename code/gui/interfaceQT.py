@@ -1,33 +1,79 @@
-#import blobconverter
+import blobconverter
 import cv2
 import numpy as np
 from PyQt5 import uic, QtCore
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QImage, QPixmap
 from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout, QLineEdit, QCheckBox, QMainWindow
-#import depthai as dai
+
+import depthai as dai
 import sys
+import argparse
+import os
+import time
 
 # tell interpreter where to look
 sys.path.insert(0, "..")
-#from app.textHelper import TextHelper
-#from app.faceRecognition import FaceRecognition
-#from app.MultiMsgSync import TwoStageHostSeqSync
+from app.textHelper import TextHelper
+from app.faceRecognition import FaceRecognition
+from app.MultiMsgSync import TwoStageHostSeqSync
 from app.Mouvement import Mouvement_camera
 
 
 class InterfaceQT(QMainWindow):
     def __init__(self):
         super(InterfaceQT, self).__init__()
+        
         try:
             uic.loadUi("../gui/assets/Interface_ProjetIA.ui", self)
         except FileNotFoundError:
             print("Could not find the UI file.")
             sys.exit(1)
+        
+        self.face_detection = True
+        self.body_detection = False
+        self.frame = None
+        
+        ## Init face
+        self.init_face()
+        
+        self.show_bounding_box = False
+        self.lancer = False
+        
+        self.label = self.findChild(QLabel, "label_2")
 
+        self.BoutonAuto = self.findChild(QPushButton, "Auto")
+        self.BoutonAuto.clicked.connect(self.BoutonAuto_clicked)
 
-        #self.check = 0
+        self.BoutonBrider = self.findChild(QPushButton, "Brider")
+        self.BoutonBrider.clicked.connect(self.BoutonBrider_clicked)
+
+        self.LancerBouton = self.findChild(QPushButton, "LancerBouton")
+        self.LancerBouton.clicked.connect(self.LancerBouton_clicked)
+
+        self.QuitterBouton = self.findChild(QPushButton, "QuitterBouton")
+        self.QuitterBouton.clicked.connect(self.QuitterBouton_clicked)
+
+        self.Text_mode = self.findChild(QLabel, "label_3")
+        self.Text_mode.setFont(QFont('Times', 15))
+
+        self.CheckBox = self.findChild(QCheckBox, "checkBox")
+        self.CheckBox.stateChanged.connect(self.clickBox)
+        self.CheckBox.setFont(QFont('Times', 11))
+        
+
+    def init_face(self):
+        
+        #try:
+        #    uic.loadUi("../gui/assets/Interface_ProjetIA.ui", self)
+        #except FileNotFoundError:
+        #    print("Could not find the UI file.")
+        #    sys.exit(1)
+
+        self.person_to_detect = "Mathieu"
+        self.check = 0
         self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
-        """
+        
+      
         self.object_camera.centrer()
 
         # Create DepthAI pipeline
@@ -125,15 +171,16 @@ class InterfaceQT(QMainWindow):
         self.parser.add_argument("-name", "--name", type=str, help="Name of the person for database saving")
 
         self.args = self.parser.parse_args()
+        #print(self.args)
 
         self.databases = "databases"
         if not os.path.exists(self.databases):
             os.mkdir(self.databases)
 
-        self.facerec = FaceRecognition(self.databases, "Mathieu")  # self.args.name)
+        self.facerec = FaceRecognition(self.databases, self.person_to_detect)
         self.sync = TwoStageHostSeqSync()
         self.text = TextHelper()
-
+        
         self.queues = {}
 
         # Connect to device and start pipeline
@@ -142,43 +189,129 @@ class InterfaceQT(QMainWindow):
         # Create output queues
         for name in ["rgb", "detection", "recognition"]:
             self.queues[name] = self.device.getOutputQueue(name)
-
+        
         self.last_exec_time = time.time()  # initialize the last execution time to 0
 
         # self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
 
-        self.label = self.findChild(QLabel, "label_2")
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_frame)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update_frame_face)
         self.timer.start(1)
-        """
-        self.cap = cv2.VideoCapture(0)
+    
+    def init_body(self):        
+        # try:
+        #    uic.loadUi("../gui/assets/Interface_ProjetIA.ui", self)
+        # except FileNotFoundError:
+        #     print("Could not find the UI file.")
+        #    sys.exit(1)
 
-        self.BoutonAuto = self.findChild(QPushButton, "Auto")
-        self.BoutonAuto.clicked.connect(self.BoutonAuto_clicked)
+        self.check = 0
+        self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
+        self.object_camera.centrer()
 
-        self.BoutonBrider = self.findChild(QPushButton, "Brider")
-        self.BoutonBrider.clicked.connect(self.BoutonBrider_clicked)
+        
+        # tiny yolo v4 label texts
+        self.labelMap = [
+            "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
+            "truck",          "boat",       "traffic light", "fire hydrant",  "stop sign",   "parking meter", "bench",
+            "bird",           "cat",        "dog",           "horse",         "sheep",       "cow",           "elephant",
+            "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
+            "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
+            "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
+            "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+            "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
+            "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
+            "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
+            "toaster",        "sink",       "refrigerator",  "book",          "clock",       "vase",          "scissors",
+            "teddy bear",     "hair drier", "toothbrush"
+        ]
 
-        self.LancerBouton = self.findChild(QPushButton, "LancerBouton")
-        self.LancerBouton.clicked.connect(self.LancerBouton_clicked)
+        self.syncNN = True
+        self.bounding_box = True
 
-        self.QuitterBouton = self.findChild(QPushButton, "QuitterBouton")
-        self.QuitterBouton.clicked.connect(self.QuitterBouton_clicked)
+        # Create pipeline
+        self.pipeline = dai.Pipeline()
+        
+        #SUPR
+        #self.pipeline.setDevice("03e7:2485")
+        
+        #modelname
+        self.nnPath = blobconverter.from_zoo(name="yolo-v4-tiny-tf")
+        #self.nnPath = blobconverter.from_zoo(name="person-detection-0200") 
 
-        self.Text_mode = self.findChild(QLabel, "label_3")
-        self.Text_mode.setFont(QFont('Times', 15))
+        # Define sources and outputs
+        self.camRgb = self.pipeline.create(dai.node.ColorCamera)
+        self.detectionNetwork = self.pipeline.create(dai.node.YoloDetectionNetwork)
+        
+        self.xoutRgb = self.pipeline.create(dai.node.XLinkOut)
+        self.nnOut = self.pipeline.create(dai.node.XLinkOut)
 
-        self.CheckBox = self.findChild(QCheckBox, "checkBox")
-        self.CheckBox.stateChanged.connect(self.clickBox)
-        self.CheckBox.setFont(QFont('Times', 11))
+        self.xoutRgb.setStreamName("rgb")
+        self.nnOut.setStreamName("nn")
+
+        # Properties
+        self.camRgb.setPreviewSize(416, 416)
+        self.VIDEO_SIZE = (1072, 1072)
+        self.camRgb.setVideoSize(self.VIDEO_SIZE)
+        self.camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+        self.camRgb.setInterleaved(False)
+        self.camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+        self.camRgb.setFps(30)
+
+        # Network specific settings
+        self.detectionNetwork.setConfidenceThreshold(0.5)
+        self.detectionNetwork.setNumClasses(len(self.labelMap))
+        self.detectionNetwork.setCoordinateSize(4)
+        self.detectionNetwork.setAnchors([10, 14, 23, 27, 37, 58, 81, 82, 135, 169, 344, 319])
+        self.detectionNetwork.setAnchorMasks({"side26": [1, 2, 3], "side13": [3, 4, 5]})
+        # detectionNetwork.setAnchorMasks({"side26": [1], "side13": [1]})
+
+        self.detectionNetwork.setIouThreshold(0.5)
+        self.detectionNetwork.setBlobPath(self.nnPath)
+        self.detectionNetwork.setNumInferenceThreads(2)
+        self.detectionNetwork.input.setBlocking(False)
+
+        # Linking
+        self.camRgb.preview.link(self.detectionNetwork.input)
+        if self.syncNN:
+            self.detectionNetwork.passthrough.link(self.xoutRgb.input)
+        else:
+            self.camRgb.preview.link(self.xoutRgb.input)
+
+        self.detectionNetwork.out.link(self.nnOut.input)
+
+
+        # Connect to device and start pipeline
+        self.device = dai.Device(self.pipeline)
+
+        # Output queues will be used to get the rgb frames and nn data from the outputs defined above
+        self.qRgb = self.device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+        self.qDet = self.device.getOutputQueue(name="nn", maxSize=4, blocking=False)
+
+        self.frame = None
+        self.detections = []
+        self.startTime = time.monotonic()
+        self.counter = 0
+        self.color = (255, 0, 0)
+        self.color2 = (255, 255, 255)
+
+        self.last_exec_time = time.time()  # initialize the last execution time to 0
+
+
+        #self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
+
+        #self.label = self.findChild(QLabel, "label_2")
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.update_frame_body)
+        self.timer.start(1)
+        # self.cap = cv2.VideoCapture(0)
 
 
     def clickBox(self, state):
         if state == QtCore.Qt.Checked:
-            print('Checked')
+            self.show_bounding_box = True
         else:
-            print('Unchecked')
+            self.show_bounding_box = False
 
     def tourner_camera(self, object_camera, xmin, xmax, ymin, ymax):
         # servo 1 horizontal
@@ -196,24 +329,25 @@ class InterfaceQT(QMainWindow):
         # print("\n")
         # time.sleep(1)
 
-    def frame_norm(self, frame, bbox):
-        normVals = np.full(len(bbox), frame.shape[0])
-        normVals[::2] = frame.shape[1]
+    def frame_norm(self, bbox):
+        normVals = np.full(len(bbox), self.frame.shape[0])
+        normVals[::2] = self.frame.shape[1]
         return (np.clip(np.array(bbox), 0, 1) * normVals).astype(int)
 
-    def update_frame(self):
-        # Get frame from video stream
-        ret, self.frame = self.cap.read()
 
-        # Display the resulting frame
-        #¶cv2.imshow('frame', self.frame)
+    def displayFrame(self, name):
+        # Show the frame
+        # Convert frame to QImage
+        self.frame = cv2.resize(self.frame, (741,511))
+        h, w, ch = self.frame.shape
+        bytesPerLine = ch * w
+        qImg = QImage(self.frame.data, w, h, bytesPerLine, QImage.Format_RGB888)
+        qImg = qImg.rgbSwapped()
 
-        # the 'q' button is set as the
-        # quitting button you may use any
-        # desired button of your choice
+        # Display frame
+        self.label.setPixmap(QPixmap.fromImage(qImg))
 
-
-        """ 
+    def update_frame_face(self):
         for name, q in self.queues.items():
             # Add all msgs (color frames, object detections and face recognitions) to the Sync class.
             if q.has():
@@ -225,10 +359,12 @@ class InterfaceQT(QMainWindow):
             self.dets = self.msgs["detection"].detections
 
             # print(self.check)
-
-            # if args.name:
-            if self.check == 2:
-                # print("enregistrement face")
+            #print("args.name:", args.name)
+            
+            #if args.name:
+            #if self.check == 2:
+            if self.check == 1:
+                print("enregistrement face")
                 for i, detection in enumerate(self.dets):
                     bbox = self.frame_norm(self.frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                     cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
@@ -238,47 +374,51 @@ class InterfaceQT(QMainWindow):
                     self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
 
             else:
-                # print("detection")
-                # Only execute the for loop if 5 seconds have passed since the last execution
-                if len(self.dets) > 0:
-                    self.object_camera.reset()
-                    if time.time() - self.last_exec_time >= 0.35:
-                        best_detection = None
-                        is_unknown = 1
-                        best_index = None
-                        for i, detection in enumerate(self.dets):
-                            if best_detection is None or detection.confidence > best_detection.confidence:
-                                if detection.label == "Unknown":
-                                    if is_unknown == 1:
-                                        best_detection = detection
-                                        best_index = i
+                if self.lancer == True:
+                    # print("detection")
+                    # Only execute the for loop if 5 seconds have passed since the last execution
+                    if len(self.dets) > 0:
+                        self.object_camera.reset()
+                        if time.time() - self.last_exec_time >= 0.35:
+                            best_detection = None
+                            is_unknown = 1
+                            best_index = None
+                            for i, detection in enumerate(self.dets):
+                                if best_detection is None or detection.confidence > best_detection.confidence:
+                                    if detection.label == "Unknown":
+                                        if is_unknown == 1:
+                                            best_detection = detection
+                                            best_index = i
+                                        else:
+                                            pass
                                     else:
-                                        pass
-                                else:
-                                    best_detection = detection
-                                    is_unknown = 0
-                                    best_index = i
+                                        best_detection = detection
+                                        is_unknown = 0
+                                        best_index = i
 
-                        if best_detection is not None:
-                            # print("move")
-                            bbox = self.frame_norm(self.frame, (
-                            best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
-                            # print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
-                            cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
+                            if best_detection is not None:
+                                # print("move")
+                                bbox = self.frame_norm(self.frame, (
+                                best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
+                                # print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
+                                
+                                features = np.array(self.msgs["recognition"][best_index].getFirstLayerFp16())
+                                conf, name = self.facerec.new_recognition(features)
+                                
+                                if self.show_bounding_box: 
+                                    cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
+                                    self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
+                                    
+                                
+                                self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax,
+                                                    best_detection.ymin, best_detection.ymax)
 
-                            features = np.array(self.msgs["recognition"][best_index].getFirstLayerFp16())
-                            conf, name = self.facerec.new_recognition(features)
-                            self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
-
-                            self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax,
-                                                best_detection.ymin, best_detection.ymax)
-
-                        self.last_exec_time = time.time()  # update the last execution time
-                else:
-                    if time.time() - self.last_exec_time >= 8:
-                        # print("balayage")
-                        self.object_camera.balayage()
-            
+                            self.last_exec_time = time.time()  # update the last execution time
+                    else:
+                        if time.time() - self.last_exec_time >= 8:
+                            # print("balayage")
+                            self.object_camera.balayage()
+                
         #self.check if frame is valid
         if self.frame is not None:
             # Convert frame to QImage
@@ -290,11 +430,60 @@ class InterfaceQT(QMainWindow):
 
             # Display frame
             self.label.setPixmap(QPixmap.fromImage(qImg))
-            """
+      
+    def update_frame_body(self):
+        if self.syncNN:
+            inRgb = self.qRgb.get()
+            inDet = self.qDet.get()
+        else:
+            inRgb = self.qRgb.tryGet()
+            inDet = self.qDet.tryGet()
+
+        if inRgb is not None:
+            self.frame = inRgb.getCvFrame()
+            #cv2.putText(frame, "NN fps: {:.2f}".format(self.counter / (time.monotonic() - self.startTime)),
+            #            (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, self.color2)
+
+        if self.lancer == True:    
+            if inDet is not None:
+                self.detections = inDet.detections
+                self.counter += 1
+                
+                # Only execute the for loop if 5 seconds have passed since the last execution
+                if len(self.detections) > 0:
+                    self.object_camera.reset()
+                    if time.time() - self.last_exec_time >= 0.35:
+                        best_detection = None
+                        best_index = None
+                        for i, detection in enumerate(self.detections):
+                            if self.labelMap[detection.label] == 'person':
+                                if best_detection is None or detection.confidence > best_detection.confidence:
+                                    best_detection = detection
+                                    best_index = i
+                       
+                        if best_detection is not None:
+                            #print("move")
+                            bbox = self.frame_norm(frame, (best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
+                            
+                            if self.show_bounding_box:
+                                cv2.putText(frame, self.labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                                cv2.putText(frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                                cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), self.color, 2)
+                            
+                                
+                            self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax, best_detection.ymin, best_detection.ymax)
+     
+                        self.last_exec_time = time.time()  # update the last execution time
+                else:
+                    if time.time() - self.last_exec_time >= 8:
+                        #print("balayage")
+                        self.object_camera.balayage()
+
+        # Check if frame is valid
+        if self.frame is not None:
+            self.displayFrame("rgb")
 
     def BoutonAuto_clicked(self):
-        self.check = 1
-        print(self.check)
         self.object_camera.set_max_degre_x_gauche(-90)
         self.object_camera.set_max_degre_x_droite(90)
         self.object_camera.set_max_degre_y_haut(-90)
@@ -305,7 +494,7 @@ class InterfaceQT(QMainWindow):
 
     def BoutonBrider_clicked(self):
         print("BoutonBrider push")
-        self.check = 2
+        #self.check = 2
         self.dialog = QDialog()
         layout = QVBoxLayout()
 
@@ -385,7 +574,24 @@ class InterfaceQT(QMainWindow):
         dialog.exec_()
 
     def LancerBouton_clicked(self):
-        a = 2
+        '''
+        if self.lancer:
+            self.lancer = False
+        else:
+            self.lancer = True
+        '''
+        
+        self.face_detection = False
+        self.body_detection = True
+        
+        try:
+            self.stop()
+        except:
+            pass
+        
+        # switch to body
+        self.init_body()
+        
         # if self.check == 0:
         #    msg = QMessageBox()
         #    msg.setWindowTitle("Face Tracking")
@@ -420,3 +626,5 @@ class InterfaceQT(QMainWindow):
         self.timer.stop()
         self.device.close()
         self.pipeline.reset()
+        self.frame = None
+        
