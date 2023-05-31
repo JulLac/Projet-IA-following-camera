@@ -10,6 +10,7 @@ import sys
 import argparse
 import os
 import time
+import glob
 
 # tell interpreter where to look
 sys.path.insert(0, "..")
@@ -74,9 +75,17 @@ class InterfaceQT(QMainWindow):
         #    print("Could not find the UI file.")
         #    sys.exit(1)
 
-        self.person_to_detect = "Matou"
-        self.check = 0
+        self.person_to_detect = "user"
+        self.save_new_face = False
         
+        # Create database folder if necessary. Clear if it already exists
+        self.databases = "databases"
+        if not os.path.exists(self.databases):
+            os.mkdir(self.databases)
+        else:
+            npz_files = glob.glob(os.path.join(self.databases, "*.npz"))
+            for file in npz_files:
+                os.remove(file)
 
         # Create DepthAI pipeline
         self.pipeline = dai.Pipeline()
@@ -169,15 +178,13 @@ class InterfaceQT(QMainWindow):
         self.arc_xout.setStreamName('recognition')
         self.face_rec_nn.out.link(self.arc_xout.input)
 
-        self.parser = argparse.ArgumentParser()
-        self.parser.add_argument("-name", "--name", type=str, help="Name of the person for database saving")
+        #self.parser = argparse.ArgumentParser()
+        #self.parser.add_argument("-name", "--name", type=str, help="Name of the person for database saving")
 
-        self.args = self.parser.parse_args()
+        #self.args = self.parser.parse_args()
         #print(self.args)
 
-        self.databases = "databases"
-        if not os.path.exists(self.databases):
-            os.mkdir(self.databases)
+        
 
         self.facerec = FaceRecognition(self.databases, self.person_to_detect)
         self.sync = TwoStageHostSeqSync()
@@ -206,8 +213,6 @@ class InterfaceQT(QMainWindow):
         # except FileNotFoundError:
         #     print("Could not find the UI file.")
         #    sys.exit(1)
-
-        self.check = 0
         
         # tiny yolo v4 label texts
         self.labelMap = [
@@ -362,8 +367,9 @@ class InterfaceQT(QMainWindow):
             
             #if args.name:
             #if self.check == 2:
-            if self.check == 1:
-                print("enregistrement face")
+
+            if self.save_new_face:
+                print("Visage en cours d'enregistrement")
                 for i, detection in enumerate(self.dets):
                     
                     bbox = self.frame_norm((detection.xmin, detection.ymin, detection.xmax, detection.ymax))
@@ -588,6 +594,16 @@ class InterfaceQT(QMainWindow):
                 QPushButton:hover{
                     background-image: url(../gui/Images/IMG_arreter_hover.png);
                 }""")
+            
+            if self.face_detection and len(os.listdir(self.databases))==0:
+                msg = QMessageBox()
+                msg.setWindowTitle("Face Tracking")
+                msg.setText("Veuillez vous positionner devant la caméra, face visible, pendant l'enregistrement de votre tête. Une fois terminé, cliquez sur arrêter.")
+                msg.setIcon(QMessageBox.Information)
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
+                self.save_new_face = True
+                
         else:
             self.lancer = False
             self.LancerBouton.setStyleSheet("""
@@ -599,12 +615,10 @@ class InterfaceQT(QMainWindow):
                     background-image: url(../gui/Images/IMG_lancer_hover.png);
                 }""")
 
-        msg = QMessageBox()
-        msg.setWindowTitle("Face Tracking")
-        msg.setText("Veuillez vous positionner devant la caméra face visible pendant l'enregistrement de votre tête")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+            self.save_new_face = False
+            
+            # Rerun read db so new npz file can be detected
+            self.facerec.read_db(self.databases)
 
 
 

@@ -35,6 +35,7 @@ class FaceRecognition:
 
         conf.append((max_, label_))
         name = conf[0] if conf[0][0] >= 0.5 else (1 - conf[0][0], "UNKNOWN")
+        print(conf)
         # self.putText(frame, f"name:{name[1]}", (coords[0], coords[1] - 35))
         # self.putText(frame, f"conf:{name[0] * 100:.2f}%", (coords[0], coords[1] - 10))
 
