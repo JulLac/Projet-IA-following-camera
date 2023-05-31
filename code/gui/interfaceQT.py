@@ -62,6 +62,9 @@ class InterfaceQT(QMainWindow):
 
         self.ToggleButonFaceBody = self.findChild(QPushButton, "ToggleFaceBody")
         self.ToggleButonFaceBody.clicked.connect(self.ToggleButonFaceBody_clicked)
+        
+        self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
+        self.object_camera.centrer()
 
     def init_face(self):
         
@@ -71,12 +74,9 @@ class InterfaceQT(QMainWindow):
         #    print("Could not find the UI file.")
         #    sys.exit(1)
 
-        self.person_to_detect = "Mathieu"
+        self.person_to_detect = "Matou"
         self.check = 0
-        self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
         
-      
-        self.object_camera.centrer()
 
         # Create DepthAI pipeline
         self.pipeline = dai.Pipeline()
@@ -208,9 +208,6 @@ class InterfaceQT(QMainWindow):
         #    sys.exit(1)
 
         self.check = 0
-        self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
-        self.object_camera.centrer()
-
         
         # tiny yolo v4 label texts
         self.labelMap = [
@@ -368,12 +365,15 @@ class InterfaceQT(QMainWindow):
             if self.check == 1:
                 print("enregistrement face")
                 for i, detection in enumerate(self.dets):
+                    
                     bbox = self.frame_norm((detection.xmin, detection.ymin, detection.xmax, detection.ymax))
-                    cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
-
+                    
                     features = np.array(self.msgs["recognition"][i].getFirstLayerFp16())
                     conf, name = self.facerec.new_recognition(features)
-                    self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
+                    
+                    if self.show_bounding_box: 
+                        cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
+                        self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
 
             else:
                 if self.lancer == True:
@@ -489,6 +489,7 @@ class InterfaceQT(QMainWindow):
         self.object_camera.set_max_degre_x_droite(90)
         self.object_camera.set_max_degre_y_haut(-90)
         self.object_camera.set_max_degre_y_bas(90)
+        self.object_camera.centrer()
 
     def get_line_edit_value(self, line_edit):
         return line_edit.text()
@@ -556,6 +557,7 @@ class InterfaceQT(QMainWindow):
                 self.object_camera.set_max_degre_x_droite(xmax)
                 self.object_camera.set_max_degre_y_haut(ymin)
                 self.object_camera.set_max_degre_y_bas(ymax)
+                self.object_camera.centrer_bridage(xmin,xmax,ymin,ymax)
 
             else:
                 self.popUp()

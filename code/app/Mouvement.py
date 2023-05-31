@@ -128,8 +128,12 @@ class Mouvement_camera:
                         self.enable_servo()#mettre en route les moteurs
 
     def centrer(self):
-        self.mouvement_horizontal(position_degre_defaut_y)
-        self.mouvement_vertical(position_degre_defaut_x)
+        self.mouvement_horizontal(position_degre_defaut_x)
+        self.mouvement_vertical(position_degre_defaut_y)
+    
+    def centrer_bridage(self,x_gauche,x_droite,y_haut,y_bas):
+        self.mouvement_horizontal((x_droite+x_gauche)/2)
+        self.mouvement_vertical((y_bas+y_haut)/2)
 
     def reset(self):
         self.direction=Centre
@@ -145,13 +149,13 @@ class Mouvement_camera:
         if(degre<=self.max_degre_x_droite and degre>=self.max_degre_x_gauche):
             pantilthat.pan(degre)
         else:
-            print("Erreur paramètre 'degré' pour mouvement horizontal hors limite, degré=",degre," ;max degré=[",self.max_degre_x_droite,',',self.max_degre_x_gauche,']')
+            print("limite atteinte 'degré' pour mouvement horizontal, degré=",degre," ;max degré=[",self.max_degre_x_droite,',',self.max_degre_x_gauche,']')
 
     def mouvement_vertical(self,degre):
         if(degre<=self.max_degre_y_bas and degre>=self.max_degre_y_haut):
             pantilthat.tilt(degre)
         else:
-            print("Erreur paramètre 'degré' pour mouvement vertical hors limite, degré=",degre," ;max degré=[",self.max_degre_y_haut,',',self.max_degre_y_bas,']')
+            print("limite atteinte 'degré' pour mouvement vertical hors limite, degré=",degre," ;max degré=[",self.max_degre_y_haut,',',self.max_degre_y_bas,']')
 
     def get_position_horizontal(self):
         return pantilthat.get_pan()#en degré servo 1
