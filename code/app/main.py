@@ -6,7 +6,6 @@ sys.path.insert(0,"..")
 from gui.interfaceQT import InterfaceQT
 
 
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     my_interface = InterfaceQT()

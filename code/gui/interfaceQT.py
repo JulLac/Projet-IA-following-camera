@@ -1,15 +1,9 @@
-import argparse
-import os
-import sys
-import time
-
 #import blobconverter
 import cv2
 import numpy as np
-from PyQt5 import uic
-from PyQt5.QtCore import QTimer
-from PyQt5.QtGui import QImage, QPixmap, QFont
-from PyQt5.QtWidgets import QMainWindow, QLabel, QPushButton, QMessageBox, QDialog, QVBoxLayout, QLineEdit
+from PyQt5 import uic, QtCore
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout, QLineEdit, QCheckBox, QMainWindow
 #import depthai as dai
 import sys
 
@@ -174,6 +168,17 @@ class InterfaceQT(QMainWindow):
 
         self.Text_mode = self.findChild(QLabel, "label_3")
         self.Text_mode.setFont(QFont('Times', 15))
+
+        self.CheckBox = self.findChild(QCheckBox, "checkBox")
+        self.CheckBox.stateChanged.connect(self.clickBox)
+        self.CheckBox.setFont(QFont('Times', 11))
+
+
+    def clickBox(self, state):
+        if state == QtCore.Qt.Checked:
+            print('Checked')
+        else:
+            print('Unchecked')
 
     def tourner_camera(self, object_camera, xmin, xmax, ymin, ymax):
         # servo 1 horizontal

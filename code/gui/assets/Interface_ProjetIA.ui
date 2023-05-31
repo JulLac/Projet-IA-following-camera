@@ -128,7 +128,7 @@ QPushButton:hover{
     <property name="geometry">
      <rect>
       <x>890</x>
-      <y>480</y>
+      <y>520</y>
       <width>241</width>
       <height>69</height>
      </rect>
@@ -166,7 +166,7 @@ QPushButton:hover{
     <property name="geometry">
      <rect>
       <x>890</x>
-      <y>570</y>
+      <y>610</y>
       <width>241</width>
       <height>69</height>
      </rect>
@@ -262,7 +262,7 @@ QPushButton:hover{
       <x>880</x>
       <y>350</y>
       <width>251</width>
-      <height>30</height>
+      <height>35</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -271,20 +271,38 @@ QPushButton:hover{
       <verstretch>0</verstretch>
      </sizepolicy>
     </property>
+    <property name="styleSheet">
+     <string>
+            QLabel#label_3 {
+                color: white;
+            }
+        </string>
+    </property>
     <property name="text">
      <string>Choix du mode</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignHCenter|Qt::AlignTop</set>
     </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>480</y>
+      <width>241</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Bounding Box </string>
+    </property>
 	<property name="styleSheet">
-        <string>
-		<![CDATA[
-            QLabel#label_3 {
+     <string>
+            QCheckBox#checkBox {
                 color: white;
             }
-        ]]>
-		</string>
+        </string>
     </property>
    </widget>
   </widget>
