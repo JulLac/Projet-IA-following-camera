@@ -29,8 +29,8 @@ class InterfaceQT(QMainWindow):
             print("Could not find the UI file.")
             sys.exit(1)
         
-        self.face_detection = True
-        self.body_detection = False
+        self.face_detection = False
+        self.body_detection = True
         self.frame = None
         
         ## Init face
@@ -59,7 +59,37 @@ class InterfaceQT(QMainWindow):
         self.CheckBox = self.findChild(QCheckBox, "checkBox")
         self.CheckBox.stateChanged.connect(self.clickBox)
         self.CheckBox.setFont(QFont('Times', 11))
-        
+
+        self.ToggleButonFaceBody = self.findChild(QPushButton, "ToggleFaceBody")
+        self.ToggleButonFaceBody.clicked.connect(self.ToggleButonFaceBody_clicked)
+
+    def ToggleButonFaceBody_clicked(self):
+        if self.body_detection:
+            self.ToggleButonFaceBody.setStyleSheet("""
+                    QPushButton{
+                        border-radius:10px;
+                        background-image: url(../gui/Images/IMG_bouton_visage.png);
+                    }
+                    QPushButton:hover{
+                        background-image: url(../gui/Images/IMG_bouton_visage_hover.png);
+                    }""")
+            self.body_detection = False
+            self.face_detection = True
+        else:
+            self.ToggleButonFaceBody.setStyleSheet("""
+                    QPushButton{
+                        border-radius:10px;
+                        background-image: url(../gui/Images/IMG_bouton_corps.png);
+                    }
+                    QPushButton:hover{
+                        background-image: url(../gui/Images/IMG_bouton_corps_hover.png);
+                    }""")
+            self.body_detection = True
+            self.face_detection = False
+        print('changement de mode')
+
+
+
 
     def init_face(self):
         
@@ -574,12 +604,30 @@ class InterfaceQT(QMainWindow):
         dialog.exec_()
 
     def LancerBouton_clicked(self):
-        '''
+
         if self.lancer:
             self.lancer = False
+            self.LancerBouton.setStyleSheet("""
+                QPushButton{
+        	        border-radius:10px;
+        	        background-image: url(../gui/Images/IMG_arreter.png);
+                }
+                QPushButton:hover{
+                    background-image: url(../gui/Images/IMG_arreter_hover.png);
+                }""")
         else:
             self.lancer = True
-        '''
+            self.LancerBouton.setStyleSheet("""
+                QPushButton{
+                    border-radius:10px;
+                    background-image: url(../gui/Images/IMG_lancer.png);
+                }
+                QPushButton:hover{
+                    background-image: url(../gui/Images/IMG_lancer_hover.png);
+                }""")
+
+
+
         
         self.face_detection = False
         self.body_detection = True

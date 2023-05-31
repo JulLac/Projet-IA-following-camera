@@ -82,13 +82,14 @@
     <property name="geometry">
      <rect>
       <x>890</x>
-      <y>390</y>
+      <y>300</y>
       <width>115</width>
       <height>69</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton{
+	background-color: rgb(255, 255, 255);
 	border-radius:10px;
 	background-image: url(../gui/Images/IMG_auto.png);
 
@@ -217,13 +218,17 @@ QPushButton:hover{
     <property name="geometry">
      <rect>
       <x>1020</x>
-      <y>390</y>
+      <y>300</y>
       <width>115</width>
       <height>69</height>
      </rect>
     </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
     <property name="styleSheet">
      <string notr="true">QPushButton{
+	background-color: rgb(255, 255, 255);
 	border-radius:10px;
 	background-image: url(../gui/Images/IMG_brider.png);
 }
@@ -259,9 +264,9 @@ QPushButton:hover{
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>350</y>
-      <width>251</width>
+      <x>890</x>
+      <y>250</y>
+      <width>241</width>
       <height>35</height>
      </rect>
     </property>
@@ -294,15 +299,53 @@ QPushButton:hover{
       <height>20</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Bounding Box </string>
-    </property>
-	<property name="styleSheet">
+    <property name="styleSheet">
      <string>
             QCheckBox#checkBox {
                 color: white;
             }
         </string>
+    </property>
+    <property name="text">
+     <string>Bounding Box </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ToggleFaceBody">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>390</y>
+      <width>241</width>
+      <height>69</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton{
+	border-radius:10px;
+	background-image: url(../gui/Images/IMG_bouton_corps.png);
+}
+QPushButton:hover{	
+	
+	background-image: url(../gui/Images/IMG_bouton_corps_hover.png);
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>true</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>
