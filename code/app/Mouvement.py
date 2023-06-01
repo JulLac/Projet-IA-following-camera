@@ -21,6 +21,7 @@ x=horizontal et y=vertical
 Haut   <-- (-90°)  0 (90°) --> Bas
 Gauche <-- (-90°)  0 (90°) --> Droite
 """
+
 class Mouvement_camera:
     def __init__(self,hauteur,largeur,xmax,xmin,ymax,ymin):
         self.hauteur=hauteur
@@ -31,6 +32,7 @@ class Mouvement_camera:
         self.ymin=ymin
         self.center=[largeur/2,hauteur/2] #entre 0 et 1
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
+        
         self.direction=Centre
         self.boucle_balayage=0
         self.temps=0
@@ -98,6 +100,7 @@ class Mouvement_camera:
         return liste_pas[0],liste_pas[1]
 
     def balayage(self):
+
         """
         But: Balayer le champ de vision pour détecter une personne (Centre->Gauche->Droite->Gauche->Droite->Centre->Pause 5 secondes->..etc)
         :return: Mouvement de la caméra
@@ -166,6 +169,7 @@ class Mouvement_camera:
         """
         But : Réinitialiser les variables permettant le balayage
         """
+
         self.direction=Centre
         self.temps=0
         self.boucle_balayage=0
