@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QLabel, QPushButton, QDialog, QVBoxLayout, QLineEdit
 
 import depthai as dai
 import sys
-import argparse
 import os
 import time
 import glob
@@ -29,17 +28,25 @@ class InterfaceQT(QMainWindow):
         except FileNotFoundError:
             print("Could not find the UI file.")
             sys.exit(1)
-        
+
+        # Init parameters
+        # Modes (Body detection or Face detection)
         self.face_detection = False
         self.body_detection = True
-        self.frame = None
-        
-        ## Init face
+
+        # Since body detection is default mode, we init the body detection constructor
         self.init_body()
-        
+
+        # Frame to display
+        self.frame = None
+
+        # Display bounding box or not
         self.show_bounding_box = False
+
+        # Token for lancer button
         self.lancer = False
-        
+
+        # Label for camera & buttons
         self.label = self.findChild(QLabel, "label_2")
 
         self.BoutonAuto = self.findChild(QPushButton, "Auto")
@@ -63,22 +70,21 @@ class InterfaceQT(QMainWindow):
 
         self.ToggleButonFaceBody = self.findChild(QPushButton, "ToggleFaceBody")
         self.ToggleButonFaceBody.clicked.connect(self.ToggleButonFaceBody_clicked)
-        
+
+        # Reset camera position
         self.object_camera = Mouvement_camera(1, 1, 0.45, 0.55, 0.45, 0.55)
         self.object_camera.centrer()
 
     def init_face(self):
-        
-        #try:
-        #    uic.loadUi("../gui/assets/Interface_ProjetIA.ui", self)
-        #except FileNotFoundError:
-        #    print("Could not find the UI file.")
-        #    sys.exit(1)
+        """
+        In this constructor, we initialize the app for the face detection mode.
+        """
 
+        # Name of the person that needs to be dedected. In this code, we have chosen to detect only one person. Others will be named "UNKNOWN".
         self.person_to_detect = "user"
         self.save_new_face = False
         
-        # Create database folder if necessary. Clear if it already exists
+        # Create database folder if it does not yet exist. Then, clear it before continuing.
         self.databases = "databases"
         if not os.path.exists(self.databases):
             os.mkdir(self.databases)
@@ -87,8 +93,10 @@ class InterfaceQT(QMainWindow):
             for file in npz_files:
                 os.remove(file)
 
-        # Create DepthAI pipeline
+        # Create pipeline
         self.pipeline = dai.Pipeline()
+
+        # Create Camera Node
         self.cam = self.pipeline.createColorCamera()
         self.cam.setPreviewSize(1072, 1072)
         self.VIDEO_SIZE = (1072, 1072)
@@ -97,56 +105,58 @@ class InterfaceQT(QMainWindow):
         self.cam.setInterleaved(False)
         self.cam.setBoardSocket(dai.CameraBoardSocket.RGB)
 
-        # Create XLinkOut nodes
+        # Create a XLinkOut node and link it to camera video output
         self.host_face_out = self.pipeline.create(dai.node.XLinkOut)
         self.host_face_out.setStreamName('rgb')
 
         # Link nodes
         self.cam.video.link(self.host_face_out.input)
 
-        # ImageManip as a workaround to have more frames in the pool.
-        # cam.preview can only have 4 frames in the pool before it will
-        # wait (freeze). Copying frames and setting ImageManip pool size to
-        # higher number will fix this issue.
+        # Create an ImageManip Node to manipulate images.
         self.copy_manip = self.pipeline.create(dai.node.ImageManip)
+
+        # Link this node to camera preview output
         self.cam.preview.link(self.copy_manip.inputImage)
         self.copy_manip.setNumFramesPool(20)
         self.copy_manip.setMaxOutputFrameSize(1072 * 1072 * 3)
 
-        # ImageManip that will crop the frame before sending it to the Face detection NN node
+        # ImageManip will crop the frame before sending it to the Face detection NN node
         self.face_det_manip = self.pipeline.create(dai.node.ImageManip)
         self.face_det_manip.initialConfig.setResize(300, 300)
         self.copy_manip.out.link(self.face_det_manip.inputImage)
 
-        # NeuralNetwork
+        # Create Face detection NN node
         print("Creating Face Detection Neural Network...")
         self.face_det_nn = self.pipeline.create(dai.node.MobileNetDetectionNetwork)
         self.face_det_nn.setConfidenceThreshold(0.5)
+
+        # Model is face-detection-retail-0004
         self.face_det_nn.setBlobPath(blobconverter.from_zoo(name="face-detection-retail-0004", shaves=6))
-        # Link Face ImageManip -> Face detection NN node
+
+        # Link Face ImageManip output to Face detection NN node input
         self.face_det_manip.out.link(self.face_det_nn.input)
 
+        # Create a XLinkOut node and link it to the Face detection NN node output
         self.face_det_xout = self.pipeline.create(dai.node.XLinkOut)
         self.face_det_xout.setStreamName("detection")
         self.face_det_nn.out.link(self.face_det_xout.input)
 
-        # Script node  allows users to run custom Python scripts on the device
-        # It will take the output from the face detection NN as an input and set ImageManipConfig
-        # to the 'age_gender_manip' to crop the initial frame
+        # Create a Script Node. It allows us to run Python scripts on the camera's CPU.
         self.script = self.pipeline.create(dai.node.Script)
         self.script.setProcessor(dai.ProcessorType.LEON_CSS)
 
+        # This script will take the output from the face detection NN node as an input.
         self.face_det_nn.out.link(self.script.inputs['face_det_in'])
         # We also interested in sequence number for syncing
         self.face_det_nn.passthrough.link(self.script.inputs['face_pass'])
 
         self.copy_manip.out.link(self.script.inputs['preview'])
 
+        # Read Script
         with open("../app/script.py", "r") as f:
             self.script.setScript(f.read())
 
-        print("Creating Head pose estimation NN")
-
+        # Create another ImageManip node for headpose estimation
         self.headpose_manip = self.pipeline.create(dai.node.ImageManip)
         self.headpose_manip.initialConfig.setResize(60, 60)
         self.headpose_manip.setWaitForConfigInput(True)
@@ -178,14 +188,6 @@ class InterfaceQT(QMainWindow):
         self.arc_xout.setStreamName('recognition')
         self.face_rec_nn.out.link(self.arc_xout.input)
 
-        #self.parser = argparse.ArgumentParser()
-        #self.parser.add_argument("-name", "--name", type=str, help="Name of the person for database saving")
-
-        #self.args = self.parser.parse_args()
-        #print(self.args)
-
-        
-
         self.facerec = FaceRecognition(self.databases, self.person_to_detect)
         self.sync = TwoStageHostSeqSync()
         self.text = TextHelper()
@@ -201,19 +203,15 @@ class InterfaceQT(QMainWindow):
         
         self.last_exec_time = time.time()  # initialize the last execution time to 0
 
-        # self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
-
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_frame_face)
         self.timer.start(1)
     
     def init_body(self):        
-        # try:
-        #    uic.loadUi("../gui/assets/Interface_ProjetIA.ui", self)
-        # except FileNotFoundError:
-        #     print("Could not find the UI file.")
-        #    sys.exit(1)
-        
+        """
+        In this constructor, we initialize the app for the body detection mode.
+        """
+
         # tiny yolo v4 label texts
         self.labelMap = [
             "person",         "bicycle",    "car",           "motorbike",     "aeroplane",   "bus",           "train",
@@ -235,13 +233,9 @@ class InterfaceQT(QMainWindow):
 
         # Create pipeline
         self.pipeline = dai.Pipeline()
-        
-        #SUPR
-        #self.pipeline.setDevice("03e7:2485")
-        
-        #modelname
+
+        # Set model's path
         self.nnPath = blobconverter.from_zoo(name="yolo-v4-tiny-tf")
-        #self.nnPath = blobconverter.from_zoo(name="person-detection-0200") 
 
         # Define sources and outputs
         self.camRgb = self.pipeline.create(dai.node.ColorCamera)
@@ -284,7 +278,6 @@ class InterfaceQT(QMainWindow):
 
         self.detectionNetwork.out.link(self.nnOut.input)
 
-
         # Connect to device and start pipeline
         self.device = dai.Device(self.pipeline)
 
@@ -301,37 +294,30 @@ class InterfaceQT(QMainWindow):
 
         self.last_exec_time = time.time()  # initialize the last execution time to 0
 
-
-        #self.stream = self.device.getOutputQueue('preview', maxSize=1, blocking=False)
-
-        #self.label = self.findChild(QLabel, "label_2")
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_frame_body)
         self.timer.start(1)
-        # self.cap = cv2.VideoCapture(0)
 
 
     def clickBox(self, state):
+        """
+        Function to handle checkbox click. This checkbox is dedicated to bounding boxes display.
+        """
         if state == QtCore.Qt.Checked:
             self.show_bounding_box = True
         else:
             self.show_bounding_box = False
 
     def tourner_camera(self, object_camera, xmin, xmax, ymin, ymax):
-        # servo 1 horizontal
-        # servo 2 vertical
-
-        # print("Position caméra:")
-        # print('Horizontal:',object_camera.get_position_horizontal())
-        # print('Vertical:',object_camera.get_position_vertical())
-        # Donner les coordonnées
+        """
+        Send bounding boxes coordinates to the Movement class.
+        """
         object_camera.setxmax(xmax)
         object_camera.setxmin(xmin)
         object_camera.setymax(ymax)
         object_camera.setymin(ymin)
         object_camera.bouger_camera()
-        # print("\n")
-        # time.sleep(1)
+
 
     def frame_norm(self, bbox):
         normVals = np.full(len(bbox), self.frame.shape[0])
@@ -352,6 +338,9 @@ class InterfaceQT(QMainWindow):
         self.label.setPixmap(QPixmap.fromImage(qImg))
 
     def update_frame_face(self):
+        """
+        This function is always called. It allows us to get information and display them.
+        """
         for name, q in self.queues.items():
             # Add all msgs (color frames, object detections and face recognitions) to the Sync class.
             if q.has():
@@ -362,12 +351,6 @@ class InterfaceQT(QMainWindow):
             self.frame = self.msgs["rgb"].getCvFrame()
             self.dets = self.msgs["detection"].detections
 
-            # print(self.check)
-            #print("args.name:", args.name)
-            
-            #if args.name:
-            #if self.check == 2:
-
             if self.save_new_face:
                 print("Visage en cours d'enregistrement")
                 for i, detection in enumerate(self.dets):
@@ -375,21 +358,17 @@ class InterfaceQT(QMainWindow):
                     bbox = self.frame_norm((detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                     
                     features = np.array(self.msgs["recognition"][i].getFirstLayerFp16())
-                    conf, name = self.facerec.new_recognition(features)
+                    # conf, name = self.facerec.new_recognition(features)
                     
                     if self.show_bounding_box:
                         cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
-                        #self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
-
+                        # self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
             else:
-                if self.lancer == True:
-                    # print("detection")
-                    # Only execute the for loop if 5 seconds have passed since the last execution
+                if self.lancer:
                     if len(self.dets) > 0:
                         self.object_camera.reset()
                         if time.time() - self.last_exec_time >= 0.35:
                             best_detection = None
-                            best_index = None
                             best_conf = 0
                             is_unknown = True
                             best_name = None
@@ -399,7 +378,6 @@ class InterfaceQT(QMainWindow):
                                 
                                 if best_detection is None:
                                     best_detection = detection
-                                    best_index = i
                                     best_conf = conf
                                     best_name = name
                                     if name != "UNKNOWN":
@@ -407,7 +385,6 @@ class InterfaceQT(QMainWindow):
                                 else:                                
                                     if (name != "UNKNOWN") and (is_unknown or conf > best_conf):
                                         best_detection = detection
-                                        best_index = i
                                         best_conf = conf
                                         best_name = name
                                     else:
@@ -415,25 +392,23 @@ class InterfaceQT(QMainWindow):
                                         # We do not think useful to prioritize some unknown person to others 
 
                             if best_detection is not None:
-                                # print("move")
                                 bbox = self.frame_norm((best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
                                 # print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
 
                                 if self.show_bounding_box: 
                                     cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
                                     self.text.putText(self.frame, f"{best_name} {(100 * best_conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
-                                    
-                                
+
                                 self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax,
                                                     best_detection.ymin, best_detection.ymax)
 
-                            self.last_exec_time = time.time()  # update the last execution time
+                            # update the last execution time
+                            self.last_exec_time = time.time()
                     else:
                         if time.time() - self.last_exec_time >= 8:
                             # print("balayage")
                             self.object_camera.balayage()
-                
-        #self.check if frame is valid
+
         if self.frame is not None:
             # Convert frame to QImage
             self.frame = cv2.resize(self.frame, (741, 511))
@@ -470,12 +445,11 @@ class InterfaceQT(QMainWindow):
                     self.object_camera.reset()
                     if time.time() - self.last_exec_time >= 0.35:
                         best_detection = None
-                        best_index = None
                         for i, detection in enumerate(self.detections):
                             if self.labelMap[detection.label] == 'person':
                                 if best_detection is None or detection.confidence > best_detection.confidence:
                                     best_detection = detection
-                                    best_index = i
+
                        
                         if best_detection is not None:
                             #print("move")
@@ -554,7 +528,6 @@ class InterfaceQT(QMainWindow):
         self.dialog.exec_()
 
     def Bouton_valider_clicked(self):
-
         try:
             self.BoutonBrider.clicked.disconnect()
             xmin = self.is_numeric(self.line_edit_xmin.text())
@@ -630,18 +603,6 @@ class InterfaceQT(QMainWindow):
             
                 # Rerun read db so new npz file can be detected
                 self.facerec.read_db(self.databases)
-
-
-
-    """
-    def button_valider_clicked(self):
-        user_input = x_min.text()
-        # Traitez l'entrée de l'utilisateur ici
-        print("Entrée de l'utilisateur :", user_input)
-        dialog.accept()
-    return x_min, x_max, y_min, y_max
-    """
-    
     
     def ToggleButonFaceBody_clicked(self):
         if self.body_detection:
@@ -694,7 +655,6 @@ class InterfaceQT(QMainWindow):
             return False
 
     def stop(self):
-        #self.timer.stop()
         self.device.close()
         #self.pipeline.reset()
         self.frame = None
