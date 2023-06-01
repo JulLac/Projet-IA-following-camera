@@ -387,7 +387,7 @@ class InterfaceQT(QMainWindow):
                     # Only execute the for loop if 5 seconds have passed since the last execution
                     if len(self.dets) > 0:
                         self.object_camera.reset()
-                        if time.time() - self.last_exec_time >= 0.01:
+                        if time.time() - self.last_exec_time >= 0.35:
                             best_detection = None
                             best_index = None
                             best_conf = 0
@@ -462,6 +462,8 @@ class InterfaceQT(QMainWindow):
             if inDet is not None:
                 self.detections = inDet.detections
                 self.counter += 1
+                # Filter list
+                self.detections = [detection for detection in self.detections if self.labelMap[detection.label] == 'person']
                 
                 # Only execute the for loop if 5 seconds have passed since the last execution
                 if len(self.detections) > 0:
