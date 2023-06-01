@@ -377,9 +377,9 @@ class InterfaceQT(QMainWindow):
                     features = np.array(self.msgs["recognition"][i].getFirstLayerFp16())
                     conf, name = self.facerec.new_recognition(features)
                     
-                    if self.show_bounding_box: 
+                    if self.show_bounding_box:
                         cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (240, 10, 10), 2)
-                        self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
+                        #self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
 
             else:
                 if self.lancer == True:
@@ -387,34 +387,41 @@ class InterfaceQT(QMainWindow):
                     # Only execute the for loop if 5 seconds have passed since the last execution
                     if len(self.dets) > 0:
                         self.object_camera.reset()
-                        if time.time() - self.last_exec_time >= 0.35:
+                        if time.time() - self.last_exec_time >= 0.01:
                             best_detection = None
-                            is_unknown = 1
                             best_index = None
+                            best_conf = 0
+                            is_unknown = True
+                            best_name = None
                             for i, detection in enumerate(self.dets):
-                                if best_detection is None or detection.confidence > best_detection.confidence:
-                                    if detection.label == "Unknown":
-                                        if is_unknown == 1:
-                                            best_detection = detection
-                                            best_index = i
-                                        else:
-                                            pass
-                                    else:
+                                features = np.array(self.msgs["recognition"][i].getFirstLayerFp16())
+                                conf, name = self.facerec.new_recognition(features)
+                                
+                                if best_detection is None:
+                                    best_detection = detection
+                                    best_index = i
+                                    best_conf = conf
+                                    best_name = name
+                                    if name != "UNKNOWN":
+                                        is_unknown = False
+                                else:                                
+                                    if (name != "UNKNOWN") and (is_unknown or conf > best_conf):
                                         best_detection = detection
-                                        is_unknown = 0
                                         best_index = i
+                                        best_conf = conf
+                                        best_name = name
+                                    else:
+                                        pass
+                                        # We do not think useful to prioritize some unknown person to others 
 
                             if best_detection is not None:
                                 # print("move")
                                 bbox = self.frame_norm((best_detection.xmin, best_detection.ymin, best_detection.xmax, best_detection.ymax))
                                 # print(detection.xmin, detection.ymin, detection.xmax, detection.ymax)
-                                
-                                features = np.array(self.msgs["recognition"][best_index].getFirstLayerFp16())
-                                conf, name = self.facerec.new_recognition(features)
-                                
+
                                 if self.show_bounding_box: 
                                     cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (10, 245, 10), 2)
-                                    self.text.putText(self.frame, f"{name} {(100 * conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
+                                    self.text.putText(self.frame, f"{best_name} {(100 * best_conf):.0f}%", (bbox[0] + 10, bbox[1] + 35))
                                     
                                 
                                 self.tourner_camera(self.object_camera, best_detection.xmin, best_detection.xmax,
@@ -474,7 +481,7 @@ class InterfaceQT(QMainWindow):
                             
                             if self.show_bounding_box:
                                 cv2.putText(self.frame, self.labelMap[detection.label], (bbox[0] + 10, bbox[1] + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-                                cv2.putText(self.frame, f"{int(detection.confidence * 100)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+                                #cv2.putText(self.frame, f"{int(detection.confidence * 10)}%", (bbox[0] + 10, bbox[1] + 40), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
                                 cv2.rectangle(self.frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), self.color, 2)
                             
                                 
@@ -615,10 +622,12 @@ class InterfaceQT(QMainWindow):
                     background-image: url(../gui/Images/IMG_lancer_hover.png);
                 }""")
 
-            self.save_new_face = False
             
-            # Rerun read db so new npz file can be detected
-            self.facerec.read_db(self.databases)
+            if self.face_detection:
+                self.save_new_face = False
+            
+                # Rerun read db so new npz file can be detected
+                self.facerec.read_db(self.databases)
 
 
 

@@ -35,13 +35,14 @@ class FaceRecognition:
 
         conf.append((max_, label_))
         name = conf[0] if conf[0][0] >= 0.5 else (1 - conf[0][0], "UNKNOWN")
-        print(conf)
         # self.putText(frame, f"name:{name[1]}", (coords[0], coords[1] - 35))
         # self.putText(frame, f"conf:{name[0] * 100:.2f}%", (coords[0], coords[1] - 10))
 
         #name format example : (1, 'UNKNOWN')
         if name[1] == "UNKNOWN":
-            self.create_db(results)
+            # if database empty
+            if len(os.listdir(self.databases))==0:
+                self.create_db(results)
         return name
 
     def read_db(self, databases_path):
