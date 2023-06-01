@@ -2,7 +2,10 @@
 
 ## Description
 
+This project tracks and follows a person as they move through a scene. The camera captures a video stream, which is sent to one or more artificial intelligence models. Their role is to detect bodies or heads. The coordinates of the detected bounding boxes are then used by a motor to rotate the camera more or less, so that the subject is always centered in the camera's field of view. This can be imagined, for example, for video surveillance, video lessons or conferences.
 
+![Interface overview](readme_overview.png)
+*Interface overview*
 
 ### Table of Contents: 
 - Hardware
@@ -12,6 +15,7 @@
 - Team members
 
 ### Hardware
+This project uses the following hardware:
 
 - [OAK-1 Camera](https://shop.luxonis.com/products/oak-1)
 - [Pan-Tilt HAT – Full kit](https://shop.pimoroni.com/products/pan-tilt-hat?variant=22408353287)
