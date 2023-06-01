@@ -65,6 +65,7 @@ while True:
     preview = node.io['preview'].tryGet()
     if preview is not None:
         sync[str(preview.getSequenceNum())] = {}
+        #node.warn(str(preview.getSequenceNum()))
         sync[str(preview.getSequenceNum())]["frame"] = preview
 
     face_dets = node.io['face_det_in'].tryGet()
@@ -72,11 +73,11 @@ while True:
         # node.warn(f"New detection start")
         passthrough = node.io['face_pass'].get()
         seq = passthrough.getSequenceNum()
-        # node.warn(f"New detection {seq}")
+        #node.warn(f"New detection {seq}")
+        #node.warn(f"sync {sync}")
         if len(sync) == 0: continue
         img = find_frame(seq) # Matching frame is the first in the list
         if img is None: continue
-
         add_detections(face_dets.detections, seq)
 
         for det in face_dets.detections:

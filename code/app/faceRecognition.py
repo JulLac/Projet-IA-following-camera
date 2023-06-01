@@ -40,7 +40,9 @@ class FaceRecognition:
 
         #name format example : (1, 'UNKNOWN')
         if name[1] == "UNKNOWN":
-            self.create_db(results)
+            # if database empty
+            if len(os.listdir(self.databases))==0:
+                self.create_db(results)
         return name
 
     def read_db(self, databases_path):
@@ -62,7 +64,7 @@ class FaceRecognition:
     def create_db(self, results):
         if self.name is None:
             if not self.printed:
-                print("Wanted to create new DB for this face, but --name wasn't specified")
+                print("Wanted to create new DB for this face, but name wasn't specified")
                 self.printed = True
             return
         print('Saving face...')

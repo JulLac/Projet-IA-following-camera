@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
 # tell interpreter where to look
 sys.path.insert(0,"..")
 
+
 from gui.interfaceQT import InterfaceQT
 
 if __name__ == '__main__':

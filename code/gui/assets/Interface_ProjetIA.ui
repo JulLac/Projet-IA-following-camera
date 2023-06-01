@@ -37,6 +37,9 @@
   <property name="styleSheet">
    <string notr="true">background-color: rgb(11, 14, 17);</string>
   </property>
+  <property name="animated">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="verticalLayoutWidget_2">
     <property name="geometry">
@@ -75,25 +78,26 @@
      </item>
     </layout>
    </widget>
-   <widget class="QPushButton" name="DetectionBouton">
+   <widget class="QPushButton" name="Auto">
     <property name="geometry">
      <rect>
-      <x>830</x>
-      <y>330</y>
-      <width>241</width>
+      <x>890</x>
+      <y>300</y>
+      <width>115</width>
       <height>69</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QPushButton{
+	background-color: rgb(255, 255, 255);
 	border-radius:10px;
-	background-image: url(../gui/Images/IMG_detecter.png);
+	background-image: url(../gui/Images/IMG_auto.png);
+
 }
 
 QPushButton:hover{	
-	
-	background-color: rgb(255, 85, 255);
-	background-image: url(../gui/Images/IMG_detecter_hover.png);
+	background-image: url(../gui/Images/IMG_auto_hover.png);
+
 }
 
 
@@ -124,8 +128,8 @@ QPushButton:hover{
    <widget class="QPushButton" name="LancerBouton">
     <property name="geometry">
      <rect>
-      <x>830</x>
-      <y>420</y>
+      <x>890</x>
+      <y>520</y>
       <width>241</width>
       <height>69</height>
      </rect>
@@ -137,7 +141,6 @@ QPushButton:hover{
 }
 QPushButton:hover{	
 	
-	background-color: rgb(255, 85, 255);
 	background-image: url(../gui/Images/IMG_lancer_hover.png);
 }</string>
     </property>
@@ -163,8 +166,8 @@ QPushButton:hover{
    <widget class="QPushButton" name="QuitterBouton">
     <property name="geometry">
      <rect>
-      <x>830</x>
-      <y>510</y>
+      <x>890</x>
+      <y>610</y>
       <width>241</width>
       <height>69</height>
      </rect>
@@ -176,7 +179,6 @@ QPushButton:hover{
 }
 QPushButton:hover{	
 	
-	background-color: rgb(255, 85, 255);
 	background-image: url(../gui/Images/IMG_quitter_hover.png);
 }</string>
     </property>
@@ -212,13 +214,147 @@ QPushButton:hover{
      <string/>
     </property>
    </widget>
+   <widget class="QPushButton" name="Brider">
+    <property name="geometry">
+     <rect>
+      <x>1020</x>
+      <y>300</y>
+      <width>115</width>
+      <height>69</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton{
+	background-color: rgb(255, 255, 255);
+	border-radius:10px;
+	background-image: url(../gui/Images/IMG_brider.png);
+}
+
+QPushButton:hover{	
+	background-image: url(../gui/Images/IMG_brider_hover.png);
+}
+
+
+
+
+</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>true</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>250</y>
+      <width>241</width>
+      <height>35</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="styleSheet">
+     <string>
+            QLabel#label_3 {
+                color: white;
+            }
+        </string>
+    </property>
+    <property name="text">
+     <string>Choix du mode</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignHCenter|Qt::AlignTop</set>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>480</y>
+      <width>241</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string>
+            QCheckBox#checkBox {
+                color: white;
+            }
+        </string>
+    </property>
+    <property name="text">
+     <string>Bounding Box </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ToggleFaceBody">
+    <property name="geometry">
+     <rect>
+      <x>890</x>
+      <y>390</y>
+      <width>241</width>
+      <height>69</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton{
+	border-radius:10px;
+	background-image: url(../gui/Images/IMG_bouton_corps.png);
+}
+QPushButton:hover{	
+	
+	background-image: url(../gui/Images/IMG_bouton_corps_hover.png);
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+    <property name="default">
+     <bool>true</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <tabstops>
   <tabstop>QuitterBouton</tabstop>
   <tabstop>LancerBouton</tabstop>
-  <tabstop>DetectionBouton</tabstop>
+  <tabstop>Auto</tabstop>
  </tabstops>
  <resources/>
  <connections/>
