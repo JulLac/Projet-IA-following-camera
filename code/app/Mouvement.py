@@ -15,7 +15,7 @@ Droite="Droite"
 Centre="Centre"
 
 """
-sources librairie: https://github.com/pimoroni/pantilt-hat 
+sources : https://github.com/pimoroni/pantilt-hat 
                    http://docs.pimoroni.com/pantilthat/
 x=horizontal et y=vertical
 Haut   <-- (-90°)  0 (90°) --> Bas
