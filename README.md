@@ -25,6 +25,10 @@ This project uses the following hardware:
 
 Run 'pip install -r code/setup/requirements.txt'. Some libraries may be missing from this file.
 
+### Start project
+
+Run directly in the Raspberry Pi the 'file code/app/main', the interface appear.
+
 ### Usage
 
 This project is composed of two modes. The first, which is activated by default, consists of detecting and tracking people (whole bodies). The second one consists in detecting faces, and recognizing them.
