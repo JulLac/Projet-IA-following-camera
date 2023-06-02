@@ -32,7 +32,6 @@ class Mouvement_camera:
         self.ymin=ymin
         self.center=[largeur/2,hauteur/2] #entre 0 et 1
         self.centre_tete=[(xmax+xmin)/2,(ymax+ymin)/2] #entre 0 et 1
-        
         self.direction=Centre
         self.boucle_balayage=0
         self.temps=0
@@ -80,7 +79,7 @@ class Mouvement_camera:
 
     def gestion_pas_camera_Horizontal_Vertical(self):
         """
-        But: Déterminer un pas fort ou faible en fct de la distance du centre de la bounding box et du centre de l'objectif avec selon un certain seuil
+        But: Déterminer un pas fort ou faible en fct de la distance du centre de la bounding box et du centre de l'objectif selon un certain seuil
         :return: liste_pas type(liste)
                  liste_pas[0] = pas fort/faible horizontal
                  liste_pas[1] = pas fort/faible vertical
@@ -169,7 +168,6 @@ class Mouvement_camera:
         """
         But : Réinitialiser les variables permettant le balayage
         """
-
         self.direction=Centre
         self.temps=0
         self.boucle_balayage=0
